@@ -16,7 +16,7 @@
         </el-form-item>
         <el-form-item label="主图" prop="form.main_image">
           <el-image style="width: 100px; height: 100px" :src="form.main_image" :v-if="form.main_image" />
-          <el-upload class="upload-demo" drag action="https://xcx.szhxch.com/i.php" multiple :on-change="img_handle">
+          <el-upload class="upload-demo" drag action="https://sc.szhxch.com/admin/upload" multiple :on-change="img_handle">
             <el-icon class="el-icon--upload"><upload-filled /></el-icon>
             <div class="el-upload__text">
               将jpg/png/webp图片拖到此处，或
@@ -25,7 +25,7 @@
           </el-upload>
         </el-form-item>
         <el-form-item label="多图" prop="form.multi_images">
-          <el-upload action="https://xcx.szhxch.com/i.php" list-type="picture-card"
+          <el-upload action="https://sc.szhxch.com/admin/upload" list-type="picture-card"
             :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-success="img_handle2" multiple>
             <el-icon>
               <Plus />
@@ -195,7 +195,7 @@ const query = async () => {
       .then((res) => {
         console.log(res);
         if (res.status.error_msg == "success") {
-          let o = res.bizobj;
+          let o = res.data;
           form.id = o.id;
           form.product_name = o.product_name;
           form.Regional_barcode = o.Regional_barcode;
@@ -331,7 +331,7 @@ const getListData = async () => {
   await api(in_data).then((res) => {
     console.log(res);
     if (res.status.error_msg == "success") {
-      tableData.value = res.bizobj;
+      tableData.value = res.data;
     } else {
       ElMessage.error("分类查询失败！");
     }
@@ -344,5 +344,6 @@ const getListData = async () => {
   padding: 50px 200px 10px 200px;
   background-color: #ffffff;
   border-radius: 14px;
+  boxshadow: var(--el-box-shadow);
 }
 </style>

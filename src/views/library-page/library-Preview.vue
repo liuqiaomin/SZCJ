@@ -94,7 +94,7 @@ const getListData = async () => {
         loading.value = false;
         if (res.status.error_msg == "success") {
             tableData.value = [];
-            tableData.value = res.bizobj;
+            tableData.value = res.data;
             total.value = Number(res.page_info.total_items);
             ElMessage.success("查询了！");
         } else {

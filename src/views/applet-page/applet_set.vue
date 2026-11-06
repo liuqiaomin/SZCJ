@@ -12,7 +12,7 @@
         <el-input v-model="form.phone"></el-input>
       </el-form-item>
       <el-form-item label="门店坐标latitude" prop="latitude">
-        <el-link type="danger" target="_blank" href="https://lbs.qq.com/tool/getpoint/get-point.html">获取坐标地址</el-link>
+        <el-link type="danger" href="https://lbs.qq.com/tool/getpoint/get-point.html">获取坐标地址</el-link>
         <el-input v-model="form.latitude"></el-input>
       </el-form-item>
       <el-form-item label="门店坐标longitude" prop="longitude">
@@ -58,18 +58,6 @@
       <el-form-item label="关于我们">
         <el-input v-model="form.About" size="medium" type="textarea" />
       </el-form-item>
-
-      <el-form-item label="飞鹅云后台注册账号" prop="F_USER">
-        <el-link type="danger" target="_blank" href="https://admin.feieyun.com/index.php">飞鹅云后台地址</el-link>
-        <el-input v-model="form.F_USER"></el-input>
-      </el-form-item>
-
-      <el-form-item label="飞鹅云后台注册账号后生成的UKEY 【备注：这不是填打印机的KEY】	" prop="F_UKEY">
-        <el-input v-model="form.F_UKEY"></el-input>
-      </el-form-item>
-      <el-form-item label="飞鹅云打印机编号" prop="F_SN">
-        <el-input v-model="form.F_SN"></el-input>
-      </el-form-item>
     </el-form>
     <el-button type="primary" @click="adds()">保存更新</el-button>
   </div>
@@ -103,9 +91,6 @@ const form = reactive({
   protocol: "",//门店协议
   Returns: "",//退换货说明
   About: "",//关于我们
-  F_USER: "",//飞鹅云后台注册账号
-  F_UKEY: "",//飞鹅云后台注册账号后生成的UKEY 【备注：这不是填打印机的KEY】
-  F_SN: "",//飞鹅云打印机编号	
 });
 
 onMounted(() => {
@@ -122,9 +107,9 @@ const getListData = async () => {
   };
   await api(in_data)
     .then((res) => {
-      console.log(res.bizobj);
+      console.log(res.data);
       if (res.status.error_msg == "success") {
-        let o = res.bizobj;
+        let o = res.data;
         form.id = o.id;
         form.branch_name = o.branch_name;
         form.Notice = o.Notice; //门店名公告
@@ -144,10 +129,6 @@ const getListData = async () => {
         form.protocol = o.protocol;//门店协议
         form.Returns = o.Returns;//退换货说明
         form.About = o.About;//关于我们
-
-        form.F_USER = o.F_USER;//飞鹅云后台注册账号
-        form.F_UKEY = o.F_UKEY;//飞鹅云后台注册账号后生成的UKEY 【备注：这不是填打印机的KEY】
-        form.F_SN = o.F_SN//飞鹅云打印机编号	
       } else {
         ElMessage.error("查询失败！");
       }

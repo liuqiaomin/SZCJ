@@ -199,7 +199,7 @@ const getListData = async () => {
     .then((res) => {
       if (res.status.error_msg == "success") {
         setTimeout(() => {
-          tableData.value = res.bizobj;
+          tableData.value = res.data;
           total.value = Number(res.page_info.total_items);
           loading.value = false;
         }, 1000);
@@ -226,7 +226,7 @@ const remoteMethod = async (query) => {
         loading.value = false;
         if (res.status.error_msg == "success") {
           setTimeout(() => {
-            options.value = res.bizobj;
+            options.value = res.data;
             searchForm.selectedValue = "";
           }, 200);
         } else {
@@ -264,7 +264,7 @@ const sp_remoteMethod = async (query) => {
         loading.value = false;
         if (res.status.error_msg == "success") {
           setTimeout(() => {
-            spoptions.value = res.bizobj;
+            spoptions.value = res.data;
             searchForm.spselectedValue = "";
           }, 200);
         } else {

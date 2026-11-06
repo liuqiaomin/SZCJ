@@ -1,10 +1,21 @@
 <template>
   <div class="user-info-container">
     <el-card class="order-card">
+      <el-form :inline="true" :model="form">
+        <el-form-item label="请输入订单ID">
+          <el-input size='medium' v-model="form.order_list_id" placeholder="请输入订单ID" class="handle-input mr10"
+            clearable></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="order_list_xq" style="margin-left: -16px">查询
+          </el-button>
+        </el-form-item>
+      </el-form>
       <div class="header">
-        <h1>订单状态：{{ form.order_list_data.state == 0 ? '待审核出库' : form.order_list_data.state == 1 ? '已审核 待分配' : form.order_list_data.state == 2 ? '配送中'
+        <h1>订单状态：{{ form.order_list_data.state == 0 ? '待分配' : form.order_list_data.state == 2 ? '配送中'
           : form.order_list_data.state == 3 ? '已完成' : form.order_list_data.state == 5 ? '退货中' :
-    form.order_list_data.state == 6 ? '退单申请中' :  '已取消' }}</h1>
+          form.order_list_data.state
+          == 6 ? '退单申请中' : form.order_list_data.state == 7 ? '已取消' : '其他' }}</h1>
         <div style="padding-top: 10px;"></div>
         <div class="info-item">
           订单号： {{ form.order_list_data.id }}
@@ -52,11 +63,6 @@
                 </el-form-item>
               </el-col>
               <el-col :span="3">
-                <el-form-item label="编码">
-                  <el-switch v-model="form.switchs_list.h" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="3">
                 <el-form-item label="名称">
                   <el-switch v-model="form.switchs_list.b" />
                 </el-form-item>
@@ -94,28 +100,17 @@
         </el-col>
       </el-row>
     </el-card>
-    <el-form :inline="true" :model="form">
-      <el-form-item label="请输入订单ID">
-        <el-input size='medium' v-model="form.order_list_id" placeholder="请输入订单ID" class="handle-input mr10"
-          clearable></el-input>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="order_list_xq" style="margin-left: -16px">查询
-        </el-button>
-      </el-form-item>
-    </el-form>
     <el-card>
       <div>
         <div id="userInfoBox" class="user-info-box">
           <!-- 标题 -->
-          <h1 class="title">深圳餐具发货单</h1>
-          <el-descriptions size='Large'>
+          <h2 class="title">深圳餐具发货单</h2>
+          <el-descriptions>
             <el-descriptions-item label="订单ID：">{{ form.order_list_id }}</el-descriptions-item>
             <el-descriptions-item label="订单类型：">
-              <el-tag size="small"> {{ form.order_list_data.XY == 1 ? '小程序订单' : form.order_list_data.XY == 0 ? '后台线下订单'
-                : form.order_list_data.XY == 2 ? '手机端下单' : '小程序预售' }}- {{
-                  form.order_list_data.mode == 0 ? '配送' :
-                    '自提'
+              <el-tag size="small"> {{ form.order_list_data.XY == 0 ? '线下订单' : '小程序订单' }}--- {{
+                form.order_list_data.mode == 0 ? '配送' :
+                '自提'
                 }}</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="经手人:">{{ form.order_list_data.created_by }}</el-descriptions-item>
@@ -126,13 +121,12 @@
           <div style="padding-top: 15px;"></div>
           <div class="body">
             <!-- 内容渲染表格 -->
-            <el-table :data="tableData" :summary-method="getSummaries" show-summary
-              style="width: 100%; margin-top: 20px" v-loading="loading" element-loading-text="加载中..." border
-              class="foot">
+            <el-table :data="tableData" v-loading="loading" element-loading-text="加载中..." border class="foot"
+              show-summary>
               <el-table-column v-if="form.switchs_list.a" type="index" label="序号" width="103" align="center" />
               <el-table-column v-if="form.switchs_list.b" prop="product_name" label="名称" align="center" width="303">
               </el-table-column>
-              <el-table-column v-if="form.switchs_list.h" prop="Regional_barcode" label="编码" align="center">
+              <el-table-column v-if="form.switchs_list.b" prop="Regional_barcode" label="编码" align="center">
               </el-table-column>
               <el-table-column v-if="form.switchs_list.c" prop="product_specification" label="规格" align="center">
               </el-table-column>
@@ -190,7 +184,6 @@ import { useRouter, useRoute } from "vue-router";
 import { ref, reactive, onMounted } from "vue";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { api } from "@/api/api";
-
 const route = useRoute();
 
 const loading = ref(false);
@@ -206,9 +199,9 @@ const form = reactive({
     c: true,
     d: true,
     e: true,
-    f: false,
+    f: true,
     g: true,
-    h: false,
+    h: true,
   },
   order_list_id: ""
 })
@@ -232,7 +225,8 @@ const order_list_xq = async () => {
   await api(in_data)
     .then((res) => {
       if (res.status.error_msg == "success") {
-        const o = res.bizobj;
+
+        const o = res.data;
         form.order_list_data = o;
         form.time = res.status.time;
         form.receipt_photo_list = o.receipt_photo_list ? JSON.parse(o.receipt_photo_list) : '';
@@ -264,7 +258,7 @@ const get_tableData = async () => {
       if (res.status.error_msg == "success") {
         setTimeout(() => {
           tableData.value = [];
-          tableData.value = res.bizobj;
+          tableData.value = res.data;
         }, 600);
       }
     })
@@ -290,12 +284,6 @@ const printObj = {
 };
 </script>
 <style lang="scss" scoped>
-/* 在你的 CSS 文件中 */
-.bold-black {
-  font-weight: bold;
-  color: black;
-}
-
 .order-card {
   border: none;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);

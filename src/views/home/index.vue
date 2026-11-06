@@ -81,7 +81,7 @@
                   <h3 style="margin-top: 10px">{{ Number(searchForm.home2.h) + Number(searchForm.home2.i) }}</h3>
                 </el-card>
               </el-col>
-              <el-col :span="8" @click="tourl('/branch/branch_xcx_User')">
+              <el-col :span="8" @click="tourl('/applet/xcx_User')">
                 <el-card shadow="hover" class="box-card c3 center-content">
                   <template #header>
                     <h3 style="margin-top: 10px">小程序新增数</h3>
@@ -314,7 +314,7 @@
                   </el-progress>
                 </el-card>
               </el-col>
-              <el-col :span="6" @click="tourl('/branch/branch_Withdrawal')">
+              <el-col :span="6" @click="tourl('/applet/applet_Withdrawal')">
                 <el-card shadow="hover" class="box-card c4">
                   <template #header>
                     <h3 class="t4">提现申请</h3>
@@ -376,9 +376,9 @@ const getListData = async () => {
   };
   await api(in_data)
     .then((res) => {
-      console.log(res.bizobj);
+      console.log(res.data);
       if (res.status.error_msg == "success") {
-        searchForm.home2 = res.bizobj;
+        searchForm.home2 = res.data;
       } else {
         ElMessage.error("查询失败！");
       }
@@ -400,23 +400,22 @@ const getListData2 = async () => {
   };
   await api(in_data)
     .then((res) => {
-      console.log(res.bizobj);
+      console.log(res.data);
       if (res.status.error_msg == "success") {
         setTimeout(() => {
-          searchForm.a = Number(res.bizobj.a);
-          searchForm.b = Number(res.bizobj.b);
-          searchForm.c = Number(res.bizobj.c);
-          searchForm.d = Number(res.bizobj.d);
-          searchForm.e = Number(res.bizobj.e);
-          searchForm.f = Number(res.bizobj.f);
-          searchForm.g = Number(res.bizobj.g);
-          searchForm.h = Number(res.bizobj.h);
-          searchForm.i = Number(res.bizobj.i);
-          searchForm.j = Number(res.bizobj.j);
-          searchForm.k = Number(res.bizobj.k);
-          searchForm.l = Number(res.bizobj.l);
-          searchForm.m = Number(res.bizobj.m);
-          searchForm.n = Number(res.bizobj.n);
+          searchForm.a = Number(res.data.a);
+          searchForm.b = Number(res.data.b);
+          searchForm.c = Number(res.data.c);
+          searchForm.d = Number(res.data.d);
+          searchForm.e = Number(res.data.e);
+          searchForm.f = Number(res.data.f);
+          searchForm.g = Number(res.data.g);
+          searchForm.h = Number(res.data.h);
+          searchForm.j = Number(res.data.j);
+          searchForm.k = Number(res.data.k);
+          searchForm.l = Number(res.data.l);
+          searchForm.m = Number(res.data.m);
+          searchForm.n = Number(res.data.n);
         }, 1000);
       } else {
         ElMessage.error("查询失败！");

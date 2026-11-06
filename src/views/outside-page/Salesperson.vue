@@ -23,6 +23,7 @@
               ></el-option>
             </el-select>
           </el-form-item>
+
           <el-form-item label="选择日期" v-if="searchForm.Customer_id">
             <el-date-picker
               v-model="searchForm.time"
@@ -35,12 +36,14 @@
               @change="timehandleSelectChange"
             />
           </el-form-item>
+
           <el-form-item v-if="searchForm.time">
             <el-button type="warning" :icon="Plus" @click="outexxx">导出表格</el-button>
           </el-form-item>
         </div>
       </el-form>
     </el-card>
+
     <el-card>
       <el-table
         :data="tableData"
@@ -48,13 +51,7 @@
         element-loading-text="加载中..."
         border
       >
-        <el-table-column
-          fixed="left"
-          prop="created_by"
-          label="开单人"
-          align="center"
-          width="150"
-        >
+        <el-table-column fixed="left" prop="created_by" label="开单人" align="center" width="150">
         </el-table-column>
         <el-table-column prop="customer_name" label="客户名" align="center" width="220">
         </el-table-column>
@@ -62,16 +59,10 @@
         </el-table-column>
         <el-table-column prop="customer_phone" label="客户电话" align="center" width="90">
         </el-table-column>
-        <el-table-column
-          prop="customer_address"
-          label="客户地址"
-          align="center"
-          width="200"
-        >
+        <el-table-column prop="customer_address" label="客户地址" align="center" width="200">
         </el-table-column>
         <el-table-column prop="is_paid" label="是否付款" align="center" width="120">
         </el-table-column>
-
         <el-table-column prop="delivery_person" label="配送员" align="center" width="190">
         </el-table-column>
         <el-table-column prop="order_total_price" label="总价" align="center" width="100">
@@ -101,7 +92,7 @@
         </el-table-column>
       </el-table>
 
-      <!--分页组件-->
+      <!-- 分页 -->
       <pagination
         v-show="total > 0"
         :total="total"
@@ -112,39 +103,40 @@
     </el-card>
   </div>
 </template>
+
 <script setup>
-import { ref, onMounted, watch, reactive } from "vue";
+import { ref, onMounted } from "vue";
 import { api, Salesperson_api } from "@/api/api";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElMessageBox, ElMessage } from "element-plus";
-import { switchServerUrl } from "@/utils/index";
+import { Plus } from "@element-plus/icons-vue";
 
 const store = useStore();
 const router = useRouter();
 
 const showSearch = ref(true);
 
-//数据源
+// 搜索表单
 const searchForm = ref({
   id: 0,
   time: "",
   page: 1,
   page_size: 20,
-
-  Customer_Name: "", //业务员
-  Customer_id: "",
+  Customer_Name: "", // 业务员名称（显示用）
+  Customer_id: "",   // 业务员ID（传参用）
 });
 
 const tableData = ref([]);
 const total = ref(0);
 const loading = ref(false);
-const roleList = ref([]);
+const customersoptions = ref([]); // 业务员搜索结果
 
-onMounted(() => {});
-//业务员搜索
-const customersoptions = ref([]); //搜索结果
+onMounted(() => {
+  // 页面初始化
+});
 
+// 业务员远程搜索
 const customers_remoteMethod = async (query) => {
   if (query) {
     loading.value = true;
@@ -157,38 +149,57 @@ const customers_remoteMethod = async (query) => {
     await api(in_data)
       .then((res) => {
         loading.value = false;
-        if (res.status.error_msg == "success") {
-          customersoptions.value = res.bizobj;
+        if (res.status && res.status.error_msg == "success") {
+          customersoptions.value = res.data;
         } else {
+          customersoptions.value = [];
           ElMessage.error("无数据！");
         }
       })
       .catch((err) => {
         loading.value = false;
+        customersoptions.value = [];
       });
+  } else {
+    customersoptions.value = [];
   }
 };
-//业务员选择
+
+// 业务员选择变化
 const handleSelectChange = (selectedItem) => {
-  if (selectedItem) {
-    console.log(selectedItem);
+  if (selectedItem && selectedItem.id) {
     searchForm.value.Customer_Name = selectedItem.username;
     searchForm.value.Customer_id = selectedItem.id;
-    getListData();
+    searchForm.value.time = "";     // 重置时间
+    searchForm.value.page = 1;      // 重置分页
+    tableData.value = [];
+    total.value = 0;
   } else {
+    // 清空
     searchForm.value.Customer_Name = "";
-    customersoptions.value = "";
+    searchForm.value.Customer_id = "";
     searchForm.value.time = "";
+    customersoptions.value = [];
+    tableData.value = [];
+    total.value = 0;
   }
 };
 
-//时间选择
+// 时间选择变化
 const timehandleSelectChange = (selectedItem) => {
-  console.log(selectedItem);
-  getListData();
+  if (selectedItem) {
+    searchForm.value.page = 1;
+    getListData();
+  }
 };
 
+// 获取列表数据
 const getListData = async () => {
+  if (!searchForm.value.Customer_id) {
+    ElMessage.warning("请先选择业务员");
+    return;
+  }
+
   loading.value = true;
   let in_data = {
     Type: "Jsearch_time",
@@ -197,60 +208,72 @@ const getListData = async () => {
     page_size: searchForm.value.page_size,
     time: searchForm.value.time,
     created_by_id: searchForm.value.Customer_id,
+    identifying: store.state.user.identifying, // 分店ID
   };
+
   await api(in_data)
     .then((res) => {
       loading.value = false;
-      if (res.status.error_msg == "success") {
-        setTimeout(() => {
-          tableData.value = res.bizobj;
-          total.value = Number(res.page_info.total_items);
-        }, 200);
+      if (res.status && res.status.error_msg == "success") {
+        tableData.value = res.data || [];
+        total.value = Number(res.page_info?.total_items || 0);
       } else {
-        options.value = [];
-        searchForm.selectedValue = "";
-        ElMessage.error("无数据！");
+        tableData.value = [];
+        total.value = 0;
+        ElMessage.error(res.status?.error_msg || "无数据！");
       }
     })
     .catch((err) => {
       loading.value = false;
+      tableData.value = [];
+      total.value = 0;
     });
 };
+
+// 导出表格
 const outexxx = async () => {
-  console.log(searchForm.value.time);
-  if (searchForm.value.time) {
-    loading.value = true;
-    let p = {
-      time: searchForm.value.time,
-      created_by_id: searchForm.value.Customer_id,
-    };
-    await Salesperson_api(p)
-      .then((res) => {
-        loading.value = false;
-        if (res.status.error_code == 0) {
-          ElMessage.success(res.status.error_msg);
-          window.location.replace(res.bizobj);
-        } else {
-          ElMessage.error(res.status.error_msg);
-        }
-      })
-      .catch((err) => {
-        loading.value = false;
-      });
-  } else {
-    ElMessage.error("请输入时间！");
+  // 校验
+  if (!searchForm.value.Customer_id) {
+    ElMessage.error("请先选择业务员！");
+    return;
   }
-};
-/**
- * 查看按钮点击事件
- */
-const onShowClick = (row) => {
-  let i = {
-    id: row.id,
+  if (!searchForm.value.time || searchForm.value.time.length !== 2) {
+    ElMessage.error("请选择时间范围！");
+    return;
+  }
+
+  loading.value = true;
+  let p = {
+    time: searchForm.value.time,
+    created_by_id: searchForm.value.Customer_id,
+    identifying: store.state.user.identifying, // 分店ID
+    downloadtp: 0, // 返回下载地址
   };
+
+  await Salesperson_api(p)
+    .then((res) => {
+      loading.value = false;
+      if (res.status && res.status.error_code == 0) {
+        ElMessage.success(res.status.error_msg || "导出成功");
+        // 下载文件
+        if (res.data) {
+          window.location.href = res.data;
+        }
+      } else {
+        ElMessage.error((res.status && res.status.error_msg) || "导出失败");
+      }
+    })
+    .catch((err) => {
+      loading.value = false;
+      ElMessage.error("导出异常，请重试");
+    });
+};
+
+// 查看详情
+const onShowClick = (row) => {
   router.push({
     path: "/Billing/Billing_xq",
-    query: i,
+    query: { id: row.id },
   });
 };
 </script>

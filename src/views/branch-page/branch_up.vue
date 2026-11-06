@@ -132,7 +132,7 @@ const getListData = async () => {
     await api(in_data)
         .then((res) => {
             if (res.status.error_msg == "success") {
-                let o = res.bizobj;
+                let o = res.data;
                 form.id = o.id;
                 form.branch_name = o.branch_name;
                 form.Notice = o.Notice; //门店名公告

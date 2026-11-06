@@ -1,43 +1,40 @@
 <template>
   <div class="home-box">
     <el-card>
+      <el-form :inline="true" :model="searchForm" v-show="showSearch">
+        <el-form-item label="搜索类型" prop="Regional_barcode ">
+          <el-select v-model="searchForm.field" clearable placeholder="选择搜索类型">
+            <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="搜索的内容" v-if="searchForm.field">
+          <el-input v-model="searchForm.content" placeholder="请输入要搜索的内容" class="handle-input mr10" clearable></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="remoteMethod" style="margin-left: -16px">查询搜索
+          </el-button></el-form-item><el-form-item>
+          <el-button @click="getListData"><el-icon>
+              <HelpFilled />
+            </el-icon>重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+    <el-card>
       <el-table :data="tableData" v-loading="loading" element-loading-text="加载中..." border>
-
-
-        <el-table-column prop="created_by" label="开单人" align="center" width="180">
-        </el-table-column>
-        <el-table-column prop="id" label="订单iD" align="center" width="90">
-        </el-table-column>
         <el-table-column prop="customer_name" label="客户名" align="center" width="200">
         </el-table-column>
-
         <el-table-column prop="order_total_price" label="订单总价" align="center" width="120">
         </el-table-column>
-
-        <el-table-column prop="created_time" label="开单时间" align="center" width="180">
-        </el-table-column>
-        <el-table-column prop="customer_address" label="客户地址" align="center" width="300">
+        <el-table-column label="财务是否收款" width="120" align="center">
+          <template #default="{ row }">
+            <span>{{ row.is_paid == "1" ? "已收" : "待收" }}</span>
+          </template>
         </el-table-column>
         <el-table-column prop="customer_phone" label="客户电话" align="center" width="130">
         </el-table-column>
-        <el-table-column label="订单状态" align="center" width="100">
-          <template #default="{ row }">
-            {{ row.state == 0 ? '待分配' : row.state
-              == 2 ? '配送中' : row.state == 3 ? '已完成' : row.state == 5 ? '退货中' : row.state == 6 ? '退单申请中' :
-                row.state == 7 ? '已取消' : '待分配' }}
-          </template>
+        <el-table-column prop="customer_address" label="客户地址" align="center" width="300">
         </el-table-column>
-        <el-table-column label="订单类型" align="center" width="150">
-          <template #default="{ row }">
-            {{ row.XY == 1 ? '小程序订单' : row.XY == 0 ? '后台线下订单' : row.XY == 2 ? '手机端下单' : '小程序预售' }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="customer_level" label="客户等级" align="center" width="120">
-        </el-table-column>
-        <el-table-column label="配送类型" align="center" width="100">
-          <template #default="{ row }">
-            {{ row.mode == 0 ? '配送' : '自提' }}
-          </template>
+        <el-table-column prop="created_time" label="开单时间" align="center" width="180">
         </el-table-column>
         <el-table-column prop="print_id" label="打印次数" align="center" width="120">
         </el-table-column>
@@ -145,7 +142,7 @@ const getListData = async () => {
       console.log(res);
       if (res.status.error_msg == "success") {
         setTimeout(() => {
-          tableData.value = res.bizobj;
+          tableData.value = res.data;
           total.value = Number(res.page_info.total_items);
           loading.value = false;
         }, 1000);
@@ -260,7 +257,7 @@ const remoteMethod = async () => {
       .then((res) => {
         loading.value = false;
         if (res.status.error_msg == "success") {
-          tableData.value = res.bizobj;
+          tableData.value = res.data;
           total.value = Number(res.page_info.total_items);
         } else {
           ElMessage.error("无数据！");

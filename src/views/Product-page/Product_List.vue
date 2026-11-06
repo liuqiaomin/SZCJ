@@ -13,7 +13,7 @@
         <el-form-item>
           <el-button type="primary" @click="remoteMethod" style="margin-left: -16px">查询搜索
           </el-button></el-form-item><el-form-item>
-          <el-button @click="czz"><el-icon>
+          <el-button @click="getListData"><el-icon>
               <HelpFilled />
             </el-icon>重置</el-button></el-form-item>
         <el-form-item>
@@ -34,18 +34,11 @@
       <el-table :data="tableData" v-loading="loading" element-loading-text="加载中..." border ref="multipleTable"
         header-cell-class-name="table-header" @selection-change="handleSelectionChange">
         <el-table-column type="selection" fixed="left" width="55" />
-
+        <el-table-column prop="Sort" label="排序" align="center" width="80">
+        </el-table-column>
         <el-table-column prop="product_name" label="商品名" align="center" width="200">
         </el-table-column>
-        <el-table-column prop="Z_stock" label="昨日库存" align="center" width="100">
-        </el-table-column>
-        <el-table-column prop="stock" label="库存" align="center">
-        </el-table-column>
-        <el-table-column prop="id" label="商品ID" align="center" width="80">
-        </el-table-column>
         <el-table-column prop="Regional_barcode" label="商品条码" align="center" width="120">
-        </el-table-column>
-        <el-table-column prop="Sort" label="排序" align="center" width="80">
         </el-table-column>
         <el-table-column label="商品图" align="center" width="95">
           <template #default="{ row }">
@@ -65,10 +58,11 @@
         </el-table-column>
         <el-table-column label="状态" width="80" align="center">
           <template #default="{ row }">
-            <span>{{ row.product_status == false ? "下架" : "上架" }}</span>
+            <span>{{ row.product_status == "1" ? "下架" : "上架" }}</span>
           </template>
         </el-table-column>
-
+        <el-table-column prop="stock" label="库存" align="center" width="180">
+        </el-table-column>
         <el-table-column prop="specification" label="规格" align="center" width="180">
         </el-table-column>
         <el-table-column prop="specification_quantity" label="规格数" align="center" width="180">
@@ -115,16 +109,6 @@ const searchForm = ref({
   page_size: 10,
 });
 
-
-const czz = () => {
-  searchForm.value.page = 1;
-  searchForm.value.page_size = 10;
-  searchForm.value.Search_Date_time = '';
-  searchForm.value.field = ""; //搜索字段
-  searchForm.value.content = ""; //搜索内容
-  searchForm.value.content2 = ""; //搜索内容
-  getListData();
-};
 const tableData = ref([]);
 const total = ref(0);
 const loading = ref(false);
@@ -134,11 +118,6 @@ const roleList = ref([]);
  * 获取商品列表
  */
 const getListData = async () => {
-  if (searchForm.value.field) {
-    console.log('有搜索')
-    remoteMethod();
-    return
-  }
   loading.value = true;
   let in_data = {
     Type: "get",
@@ -152,7 +131,7 @@ const getListData = async () => {
     loading.value = false;
     if (res.status.error_msg == "success") {
       tableData.value = [];
-      tableData.value = res.bizobj;
+      tableData.value = res.data;
       total.value = Number(res.page_info.total_items);
       ElMessage.success("查询了！");
     } else {
@@ -227,10 +206,6 @@ const onRemoveClick = async (row) => {
 // 查询操作
 const options = [
   {
-    value: "id",
-    label: "商品名ID",
-  },
-  {
     value: "product_name",
     label: "商品名",
   },
@@ -256,15 +231,15 @@ const remoteMethod = async () => {
       Table: "products",
       condition_name1: searchForm.value.field,
       condition1: searchForm.value.content,
-      page: searchForm.value.page,
-      page_size: searchForm.value.page_size,
+      page: 1,
+      page_size: 10000,
     };
     await api(in_data)
       .then((res) => {
         loading.value = false;
         if (res.status.error_msg == "success") {
-          tableData.value = res.bizobj;
-          total.value = res.count
+          tableData.value = res.data;
+          total.value = 0;
         } else {
           ElMessage.error("无数据！");
         }
@@ -322,6 +297,7 @@ const hides_homes = () => {
           if (res.status.error_code == 0) {
             resolve(undefined); // 如果成功，则解析这个 promise，并传递 undefined 作为结果
             ElMessage.success(grocery_price2); // 使用 toFixed(2) 保留两位小数并显示
+            remoteMethod();
           } else {
             ElMessage.Error(grocery_price2); // 使用 toFixed(2) 保留两位小数并显示
             reject(new Error("API 请求成功但返回了错误状态码")); // 也可以在这里提供一个具体的错误对象

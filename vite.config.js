@@ -34,18 +34,17 @@ export default defineConfig({
     },
     server: {
         host: '0.0.0.0',
-        port: 9998, // 服务端口号
-        open: true, // 服务启动时是否自动打开浏览器
-        cors: true, // 允许跨域
+        port: 9998,
+        open: true,
+        cors: true,
         proxy: {
-            "/api": {
-                target: 'https://xcx.szhxch.com/',
+            '/admin': {
+                target: 'https://sc.szhxch.com', // 后端真实地址（或 80/你的 TP 端口）
                 changeOrigin: true,
-                // rewrite: (path) => path.replace(/^\/api/, ""),
-            },
-        },
-
-    },
+                secure: false
+            }
+        }
+    }
 
 
 })

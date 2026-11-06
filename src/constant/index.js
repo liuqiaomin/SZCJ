@@ -9,7 +9,7 @@ export const YFB_URL = '2预发布环境接口域名'
 // 3线上环境
 export const PRO_URL = '3线上环境接口域名'
 // 4本地开发,会触发代理
-export const DEV_URL = '/api'
+export const DEV_URL = ''
 //接口版本号
 export const VERSION = '10000'
 //接口测试版本号

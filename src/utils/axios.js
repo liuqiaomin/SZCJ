@@ -48,7 +48,7 @@ export default function http(options) {
   if (store.getters.token) {
     data.sys_token = store.getters.token
     data.identifying = store.getters.userInfo.identifying
-    data.v = '202503081'
+    data.v =202503081
   }
   if (method == "get") {
     opt = {

@@ -4,14 +4,15 @@
             <div class="header">
                 <h1>订单状态：{{ form.order_list_data.state == 0 ? '待分配' : form.order_list_data.state == 2 ? '配送中'
                     : form.order_list_data.state == 3 ? '已完成' : form.order_list_data.state == 5 ? '退货中' :
-        form.order_list_data.state == 6 ? '退单申请中' : '已取消' }}</h1>
+                        form.order_list_data.state
+                            == 6 ? '退单申请中' : form.order_list_data.state == 7 ? '已取消' : '其他' }}</h1>
                 <div style="padding-top: 10px;"></div>
                 <div class="info-item">
                     订单号： {{ form.order_list_data.id }}
                 </div>
                 <div class="info-item">
                     订单类型： {{ form.order_list_data.XY == 0 ? '线下订单' : '小程序订单' }}--- {{ form.order_list_data.mode == 0 ?
-                    '配送' : '自提'
+                        '配送' : '自提'
                     }}
                 </div>
                 <div class="info-item">
@@ -120,7 +121,7 @@
                         <el-col :span="6">
                             <div />
                             订单类型： {{ form.order_list_data.XY == 0 ? '线下订单' : '小程序订单' }}--- {{ form.order_list_data.mode
-                            == 0 ? '配送' :
+                                == 0 ? '配送' :
                             '自提'
                             }}
                         </el-col>
@@ -223,7 +224,7 @@ const order_list_xq = async () => {
         .then((res) => {
             if (res.status.error_msg == "success") {
 
-                const o = res.bizobj;
+                const o = res.data;
                 form.order_list_data = o;
                 form.time = res.status.time;
                 form.receipt_photo_list = o.receipt_photo_list ? JSON.parse(o.receipt_photo_list) : '';
@@ -254,7 +255,7 @@ const get_tableData = async () => {
             if (res.status.error_msg == "success") {
                 setTimeout(() => {
                     tableData.value = [];
-                    tableData.value = res.bizobj;
+                    tableData.value = res.data;
                 }, 600);
             }
         })

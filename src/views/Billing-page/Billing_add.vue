@@ -277,7 +277,7 @@ const customers_remoteMethod = async (query) => {
       .then((res) => {
         loading.value = false;
         if (res.status.error_msg == "success") {
-          customersoptions.value = res.bizobj;
+          customersoptions.value = res.data;
         } else {
           ElMessage.error("无数据！");
         }
@@ -317,7 +317,7 @@ const get_preorder = async () => {
       loading.value = false;
       if (res.status.error_msg == "success") {
         setTimeout(() => {
-          tableData.value = res.bizobj;
+          tableData.value = res.data;
         }, 500);
       }
     })
@@ -343,7 +343,7 @@ const products_remoteMethod = async (query) => {
       .then((res) => {
         loading.value = false;
         if (res.status.error_msg == "success") {
-          productsoptions.value = res.bizobj;
+          productsoptions.value = res.data;
         } else {
           ElMessage.error("无数据！");
         }
@@ -405,12 +405,12 @@ const orders_customers_id = async (a, s) => {
   await api(p)
     .then((res) => {
       if (res.status.error_msg == "success") {
-        form.CX_level = res.bizobj.level_price;
-        form.CX_list = res.bizobj;
-        form.product_list.level_price = res.bizobj.level_price; //等级价
-        form.product_list.Total_price = res.bizobj.level_price; //总价
+        form.CX_level = res.data.level_price;
+        form.CX_list = res.data;
+        form.product_list.level_price = res.data.level_price; //等级价
+        form.product_list.Total_price = res.data.level_price; //总价
 
-        console.log("无购买记录11", res.bizobj.level_price, form.product_listlevel_price);
+        console.log("无购买记录11", res.data.level_price, form.product_listlevel_price);
       } else {
         return false;
         console.log("无购买记录");
@@ -566,7 +566,7 @@ const printObj = {
   // 打印区域
   id: "userInfoBox",
   // 打印标题
-  popTitle: "深圳餐具-管理后台",
+  popTitle: "深圳餐具-小程序管理后台",
   // 打印前
 
   beforeOpenCallback(vue) {

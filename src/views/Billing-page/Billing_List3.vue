@@ -2,244 +2,212 @@
   <div class="home-box">
     <el-card>
       <el-form :inline="true" :model="searchForm" v-show="showSearch">
-        <el-form-item label="搜索类型" prop="Regional_barcode ">
+        <el-form-item label="搜索类型">
           <el-select v-model="searchForm.field" clearable placeholder="选择搜索类型">
-            <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
-        <el-form-item label="搜索的内容" v-if="searchForm.field">
-          <el-input v-model="searchForm.content" placeholder="请输入要搜索的内容" class="handle-input mr10" clearable></el-input>
+        <el-form-item label="搜索内容" v-if="searchForm.field">
+          <el-input
+            v-model="searchForm.content"
+            placeholder="请输入要搜索的内容"
+            clearable
+            @keyup.enter="remoteMethod"
+          />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="remoteMethod" style="margin-left: -16px">查询搜索
-          </el-button></el-form-item><el-form-item>
-          <el-button @click="getListData"><el-icon>
-              <HelpFilled />
-            </el-icon>重置</el-button></el-form-item>
+          <el-button type="primary" @click="remoteMethod">查询搜索</el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="resetSearch">重置</el-button>
+        </el-form-item>
       </el-form>
     </el-card>
-    <el-card>
-      <el-table :data="tableData" v-loading="loading" element-loading-text="加载中..." border show-summary>
-        <el-table-column prop="id" label="订单iD" align="center" width="90">
-        </el-table-column>
-        <el-table-column prop="customer_name" label="客户名" align="center" width="200">
-        </el-table-column>
-        <el-table-column prop="order_total_price" label="订单总价" align="center" width="120">
-        </el-table-column>
-        <el-table-column prop="customer_level" label="客户等级" align="center" width="120">
-        </el-table-column>
-        <el-table-column prop="customer_phone" label="客户电话" align="center" width="130">
-        </el-table-column>
-        <el-table-column prop="customer_address" label="客户地址" align="center" width="300">
-        </el-table-column>
-        <el-table-column prop="created_by" label="开单人" align="center" width="180">
-        </el-table-column>
-        <el-table-column prop="created_time" label="开单时间" align="center" width="180">
-        </el-table-column>
-        <el-table-column prop="print_id" label="打印次数" align="center" width="120">
-        </el-table-column>
-        <el-table-column prop="delivery_person" label="配送员" align="center" width="180">
-        </el-table-column>
 
+    <el-card>
+      <el-table :data="tableData" v-loading="loading" element-loading-text="加载中..." border>
+        <el-table-column prop="id" label="订单ID" align="center" width="90" />
+        <el-table-column prop="customer_name" label="客户名" align="center" width="200" />
+        <el-table-column prop="order_total_price" label="订单总价" align="center" width="120" />
+        <el-table-column prop="customer_level" label="客户等级" align="center" width="120" />
+        <el-table-column prop="customer_phone" label="客户电话" align="center" width="130" />
+        <el-table-column prop="customer_address" label="客户地址" align="center" width="300" />
+        <el-table-column prop="created_by" label="开单人" align="center" width="180" />
+        <el-table-column prop="created_time" label="开单时间" align="center" width="180" />
+        <el-table-column prop="print_id" label="打印次数" align="center" width="120" />
+        <el-table-column prop="delivery_person" label="配送员" align="center" width="180" />
         <el-table-column label="交付图" align="center" width="95">
           <template #default="{ row }">
-            <el-image class="avatar" :src="row.receipt_photo" :z-index="10" :preview-src-list="[row.receipt_photo]"
-              preview-teleported>
-            </el-image>
+            <el-image
+              class="avatar"
+              :src="row.receipt_photo"
+              :preview-src-list="[row.receipt_photo]"
+              preview-teleported
+            />
           </template>
         </el-table-column>
         <el-table-column label="操作" width="168" align="center" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" plain @click="onShowClick(row)">查看</el-button>
-            <el-button v-if="row.print_id == 0" type="primary" plain @click="API_PHP_DEMObu(row)">
-              打印
-            </el-button>
-            <el-button v-else plain @click="API_PHP_DEMObu(row)"> 打印 </el-button>
+            <el-button plain @click="API_PHP_DEMObu(row)">打印</el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <!--分页组件-->
-      <pagination v-show="total > 0" :total="total" v-model:page="searchForm.page" v-model:limit="searchForm.page_size"
-        @pagination="getListData" />
+      <pagination
+        v-show="total > 0"
+        :total="total"
+        v-model:page="searchForm.page"
+        v-model:limit="searchForm.page_size"
+        @pagination="onPagination"
+      />
     </el-card>
   </div>
 </template>
+
 <script setup>
-import { ref, onMounted, watch, reactive } from "vue";
+import { ref, onMounted } from "vue";
 import { api, API_PHP_DEMO } from "@/api/api";
-import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-import { ElMessageBox, ElMessage } from "element-plus";
-import { switchServerUrl } from "@/utils/index";
+import { ElMessage } from "element-plus";
 
-const store = useStore();
 const router = useRouter();
-
 const showSearch = ref(true);
 
-//数据源
 const searchForm = ref({
-  id: 0,
-  Regional_barcode: "",
-  role: "",
-  date: "",
   page: 1,
   page_size: 10,
-  row: "",
-  field: "", //搜索字段
-  content: "", //搜索内容
-  content2: "", //搜索内容
+  field: "",
+  content: "",
 });
 
 const tableData = ref([]);
 const total = ref(0);
 const loading = ref(false);
-const roleList = ref([]);
 
-// onMounted(() => {
+const options = [
+  { value: "id", label: "订单ID" },
+  { value: "customer_name", label: "客户名" },
+  { value: "customer_phone", label: "客户电话" },
+  { value: "created_by", label: "开单人" },
+  { value: "delivery_person", label: "配送员" },
+];
 
-// });
-// watch(
-//   () => router.currentRoute.value,
-//   () => {
-//     getListData();
-//   }
-// );
-/**
- * 获取商品列表
- */
+// ==================== 列表 ====================
+onMounted(() => {
+  getListData();
+});
+
 const getListData = async () => {
   loading.value = true;
-  let in_data = {
+  const in_data = {
     Type: "Billing_List3",
     Table: "order_list",
     page: searchForm.value.page,
     page_size: searchForm.value.page_size,
     condition_name1: "Warehouse_sh",
-    condition1: 3,
+    condition1: "3",
   };
-  await api(in_data)
-    .then((res) => {
-      console.log(res);
-      if (res.status.error_msg == "success") {
-        setTimeout(() => {
-          tableData.value = res.bizobj;
-          total.value = Number(res.page_info.total_items);
-          loading.value = false;
-        }, 1000);
-      } else {
-        ElMessage.error("查询失败！");
-      }
-      loading.value = false;
-      r;
-    })
-    .catch((err) => {
-      loading.value = false;
-    });
+  try {
+    const res = await api(in_data);
+    if (res.status?.error_msg === "success") {
+      tableData.value = res.data || [];
+      total.value = Number(res.page_info?.total_items || 0);
+    } else {
+      ElMessage.error("查询失败");
+    }
+  } catch (err) {
+    console.error(err);
+  } finally {
+    loading.value = false;
+  }
 };
-getListData();
-const add_LiSt = () => {
-  router.push({
-    path: "/Billing/Billing_add",
-    // query: row,
-  });
+
+// ==================== 搜索 ====================
+const remoteMethod = async () => {
+  if (!searchForm.value.field) {
+    ElMessage.warning("请选择搜索类型");
+    return;
+  }
+  loading.value = true;
+  searchForm.value.page = 1;
+  tableData.value = [];
+
+  const in_data = {
+    Type: "Jsearch2",
+    Table: "order_list",
+    condition_name1: searchForm.value.field,
+    condition1: searchForm.value.content,
+    condition_name2: "Warehouse_sh",
+    condition2: "3",
+    page: 1,
+    page_size: searchForm.value.page_size,
+  };
+
+  try {
+    const res = await api(in_data);
+    if (res.status?.error_msg === "success") {
+      tableData.value = res.data || [];
+      total.value = Number(res.page_info?.total_items || 0);
+    } else {
+      ElMessage.warning("无数据");
+      total.value = 0;
+    }
+  } catch (err) {
+    console.error(err);
+  } finally {
+    loading.value = false;
+  }
 };
-/**
- * 查看按钮点击事件
- */
+
+// ==================== 重置 ====================
+const resetSearch = () => {
+  searchForm.value.field = "";
+  searchForm.value.content = "";
+  searchForm.value.page = 1;
+  getListData();
+};
+
+// ==================== 分页 ====================
+const onPagination = () => {
+  if (searchForm.value.field) {
+    // 搜索状态下翻页，重新调搜索接口
+    remoteMethod();
+  } else {
+    getListData();
+  }
+};
+
+// ==================== 查看 ====================
 const onShowClick = (row) => {
-  let i = {
-    id: row.id,
-  };
   router.push({
     path: "/Billing/Billing_xq",
-    query: i,
+    query: { id: row.id },
   });
 };
+
+// ==================== 打印 ====================
 const API_PHP_DEMObu = async (row) => {
-  console.log(row);
-
-  let in_data = {
-    id: row.id,
-  };
-  await API_PHP_DEMO(in_data)
-    .then((res) => {
-      console.log(res);
-      if (res.status.error_msg == "success") {
-        ElMessage.success("发起打印成功");
-      } else {
-        ElMessage.error("发起打印失败！");
-      }
-    })
-    .catch((err) => {});
-};
-
-// 查询操作
-const options = [
-  {
-    value: "id",
-    label: "订单ID",
-  },
-  {
-    value: "customer_name",
-    label: "客户名",
-  },
-
-  {
-    value: "customer_phone",
-    label: "客户电话",
-  },
-  {
-    value: "created_by",
-    label: "开单人",
-  },
-  {
-    value: "delivery_person",
-    label: "配送员",
-  },
-];
-const remoteMethod = async () => {
-  if (searchForm.value.field) {
-    loading.value = true;
-    tableData.value = [];
-    let in_data = {
-      Type: "Jsearch2",
-      Table: "order_list",
-      condition_name1: searchForm.value.field,
-      condition1: searchForm.value.content,
-      condition_name2: "Warehouse_sh",
-      condition2: 3,
-      page_size: 10000,
-    };
-    await api(in_data)
-      .then((res) => {
-        loading.value = false;
-        if (res.status.error_msg == "success") {
-          tableData.value = res.bizobj;
-          total.value = 0;
-        } else {
-          ElMessage.error("无数据！");
-        }
-      })
-      .catch((err) => {
-        loading.value = false;
-      });
+  try {
+    const res = await API_PHP_DEMO({ id: row.id });
+    if (res.status?.error_msg === "success") {
+      ElMessage.success("发起打印成功");
+    } else {
+      ElMessage.error("发起打印失败");
+    }
+  } catch (err) {
+    console.error(err);
   }
 };
 </script>
 
 <style lang="scss" scoped>
 .home-box {
-  .header {
-    margin-bottom: 22px;
-    text-align: right;
-  }
-
-  ::v-deep .el-tag {
-    margin-right: 6px;
-  }
-
   ::v-deep .avatar {
     width: 60px;
     height: 60px;

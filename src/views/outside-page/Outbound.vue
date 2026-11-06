@@ -1,36 +1,17 @@
 <template>
   <div class="home-box">
     <el-form :inline="true" :model="searchForm" v-show="showSearch">
-      <el-form-item label="搜索类型" prop="Regional_barcode ">
-        <el-select v-model="searchForm.field" clearable placeholder="选择搜索类型">
-          <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="搜索的内容" v-if="searchForm.field">
-        <el-input v-model="searchForm.content" placeholder="请输入要搜索的内容" class="handle-input mr10" clearable></el-input>
-      </el-form-item>
-      <el-form-item label="搜索时间" prop="Search_Date_time">
-        <el-date-picker v-model="searchForm.Search_Date_time" type="datetimerange" :shortcuts="shortcuts"
-          format="YYYY/MM/DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" range-separator="至" start-placeholder="开始日期"
-          end-placeholder="结束日期" />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="remoteMethod" style="margin-left: -16px">查询搜索
-        </el-button>
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="czz">
-          <el-icon>
-            <HelpFilled />
-          </el-icon>重置
-        </el-button>
-      </el-form-item>
-    </el-form>
-    <el-form :inline="true" :model="searchForm" v-show="showSearch">
       <div style="padding: 15px">
         <el-form-item label="选择日期">
-          <el-date-picker v-model="searchForm.time" type="daterange" range-separator="至" start-placeholder="开始日期"
-            end-placeholder="结束日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+          <el-date-picker
+            v-model="searchForm.time"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+          />
         </el-form-item>
         <el-form-item>
           <el-button type="warning" :icon="Plus" @click="outexxx">导出表格</el-button>
@@ -38,7 +19,12 @@
       </div>
     </el-form>
     <el-card>
-      <el-table :data="tableData" show-summary v-loading="loading" element-loading-text="加载中..." border>
+      <el-table
+        :data="tableData"
+        v-loading="loading"
+        element-loading-text="加载中..."
+        border
+      >
         <el-table-column prop="product_name" label="商品名" align="center" width="250">
         </el-table-column>
         <el-table-column prop="Receiptprice" label="入库价" align="center" width="90">
@@ -49,10 +35,20 @@
         </el-table-column>
         <el-table-column prop="level_price" label="单价" align="center" width="200">
         </el-table-column>
-        <el-table-column prop="product_quantity" label="出售数量" align="center" width="120">
+        <el-table-column
+          prop="product_quantity"
+          label="出售数量"
+          align="center"
+          width="120"
+        >
         </el-table-column>
 
-        <el-table-column prop="product_specification" label="规格" align="center" width="190">
+        <el-table-column
+          prop="product_specification"
+          label="规格"
+          align="center"
+          width="190"
+        >
         </el-table-column>
         <el-table-column prop="product_unit" label="单位" align="center" width="120">
         </el-table-column>
@@ -65,8 +61,13 @@
       </el-table>
 
       <!--分页组件-->
-      <pagination v-show="total > 0" :total="total" v-model:page="searchForm.page" v-model:limit="searchForm.page_size"
-        @pagination="getListData" />
+      <pagination
+        v-show="total > 0"
+        :total="total"
+        v-model:page="searchForm.page"
+        v-model:limit="searchForm.page_size"
+        @pagination="getListData"
+      />
     </el-card>
   </div>
 </template>
@@ -83,81 +84,12 @@ const router = useRouter();
 
 const showSearch = ref(true);
 
-const Search_Date_time = ref('')
-
-const shortcuts = [
-  {
-    text: '最近一周',
-    value: () => {
-      const end = new Date()
-      const start = new Date()
-      start.setDate(start.getDate() - 7)
-      return [start, end]
-    },
-  },
-  {
-    text: '最近一个月',
-    value: () => {
-      const end = new Date()
-      const start = new Date()
-      start.setMonth(start.getMonth() - 1)
-      return [start, end]
-    },
-  },
-  {
-    text: '最近三个月',
-    value: () => {
-      const end = new Date()
-      const start = new Date()
-      start.setMonth(start.getMonth() - 3)
-      return [start, end]
-    },
-  },
-]
-
-// 查询操作
-const options = [
-  {
-    value: "product_name",
-    label: "商品名",
-  }
-];
-const remoteMethod = async () => {
-  if (searchForm.value.field) {
-    loading.value = true;
-    tableData.value = [];
-    let in_data = {
-      Type: "Search_Date",
-      Table: "orders",
-      condition_name1: searchForm.value.field,
-      condition1: searchForm.value.content,
-      Search_Date_time: JSON.stringify(searchForm.value.Search_Date_time),
-      page: searchForm.value.page,
-      page_size: searchForm.value.page_size
-    };
-    await api(in_data)
-      .then((res) => {
-        loading.value = false;
-        if (res.status.error_msg == "success") {
-          tableData.value = res.bizobj;
-          total.value = res.count;
-        } else {
-          ElMessage.error("无数据！");
-        }
-      })
-      .catch((err) => {
-        loading.value = false;
-      });
-  }
-};
-
-
 //数据源
 const searchForm = ref({
   id: 0,
   time: "",
   page: 1,
-  page_size: 20,
+  page_size: 100,
 });
 
 const tableData = ref([]);
@@ -169,10 +101,6 @@ onMounted(() => {
   getListData();
 });
 const getListData = async () => {
-  if (searchForm.value.field) {
-    remoteMethod();
-    return
-  }
   loading.value = true;
   let in_data = {
     Type: "Jsearch",
@@ -189,7 +117,7 @@ const getListData = async () => {
       loading.value = false;
       if (res.status.error_msg == "success") {
         setTimeout(() => {
-          tableData.value = res.bizobj;
+          tableData.value = res.data;
           total.value = Number(res.page_info.total_items);
         }, 200);
       } else {
@@ -213,7 +141,7 @@ const outexxx = async () => {
         loading.value = false;
         if (res.status.error_code == 0) {
           ElMessage.success(res.status.error_msg);
-          window.location.replace(res.bizobj);
+          window.location.replace(res.data);
         } else {
           ElMessage.error(res.status.error_msg);
         }
@@ -224,15 +152,6 @@ const outexxx = async () => {
   } else {
     ElMessage.error("请输入时间！");
   }
-};
-const czz = () => {
-  searchForm.value.page = 1;
-  searchForm.value.page_size = 10;
-  searchForm.value.Search_Date_time = '';
-  searchForm.value.field = ""; //搜索字段
-  searchForm.value.content = ""; //搜索内容
-  searchForm.value.content2 = ""; //搜索内容
-  getListData();
 };
 </script>
 

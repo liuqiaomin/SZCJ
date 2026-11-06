@@ -41,7 +41,7 @@
         <el-table-column label="操作" width="208" align="center" fixed="right">
           <template #default="{ row }">
             <el-button type="danger" plain @click="onRemoveClick(row)">删除</el-button>
-            <el-button plain @click="up_bus(row)">编辑</el-button>
+            <el-button plain @click="up_bu(row)">编辑</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -105,6 +105,9 @@
           </el-radio-group>
         </el-form-item>
       </el-form>
+
+      <el-table-column prop="created_time" label="注册时间" align="center" width="200">
+      </el-table-column>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="up_dialogVisible = false">取消</el-button>
@@ -114,244 +117,243 @@
     </el-dialog>
   </div>
 </template>
-  <script setup>
-  import { ref, onMounted, watch, reactive } from "vue";
-  import { api } from "@/api/api";
-  import { useStore } from "vuex";
-  import { useRouter } from "vue-router";
-  import { ElMessageBox, ElMessage } from "element-plus";
-  import { switchServerUrl } from "@/utils/index";
+<script setup>
+import { ref, onMounted, watch, reactive } from "vue";
+import { api } from "@/api/api";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
+import { ElMessageBox, ElMessage } from "element-plus";
+import { switchServerUrl } from "@/utils/index";
 
-  const store = useStore();
-  const router = useRouter();
-  const showSearch = ref(true);
+const store = useStore();
+const router = useRouter();
+const showSearch = ref(true);
 
-  //数据源
-  const searchForm = ref({
-    id: 0,
-    customer_name: "",
-    wechat: "",
-    phone: "",
-    address: "",
-    type: "",
-    level: "",
-    page: 1,
-    page_size: 20,
+//数据源
+const searchForm = ref({
+  id: 0,
+  customer_name: "",
+  wechat: "",
+  phone: "",
+  address: "",
+  type: "",
+  level: "",
+  page: 1,
+  page_size: 20,
 
-    field: "", //搜索字段
-    content: "", //搜索内容
+  field: "", //搜索字段
+  content: "", //搜索内容
+});
+
+const tableData = ref([]);
+const total = ref(0);
+const loading = ref(false);
+const roleList = ref([]);
+
+/**
+ * 获取商品列表
+ */
+const getListData = async () => {
+  loading.value = true;
+  let in_data = {
+    Type: "get",
+    Table: "customers",
+    page: searchForm.value.page,
+    page_size: searchForm.value.page_size,
+    ORDER_da: " DESC",
+  };
+  await api(in_data)
+    .then((res) => {
+      console.log(res);
+      if (res.status.error_msg == "success") {
+        setTimeout(() => {
+          tableData.value = res.data;
+          total.value = Number(res.page_info.total_items);
+          loading.value = false;
+        }, 1000);
+      } else {
+        ElMessage.error("查询失败！");
+      }
+      loading.value = false;
+      r;
+    })
+    .catch((err) => {
+      loading.value = false;
+    });
+};
+
+getListData();
+
+/**
+ * 删除按钮点击事件
+ */
+const onRemoveClick = async (row) => {
+  const confirmResult = await ElMessageBox.confirm(
+    "确定要删除【" + row.customer_name + "】这个客户吗",
+    {
+      type: "warning",
+    }
+  ).catch((err) => {
+    console.error(err);
   });
 
-  const tableData = ref([]);
-  const total = ref(0);
-  const loading = ref(false);
-  const roleList = ref([]);
-
-  /**
-   * 获取商品列表
-   */
-  const getListData = async () => {
-    loading.value = true;
-    let in_data = {
-      Type: "get",
+  if (confirmResult) {
+    const requestData = {
+      id: row.id,
       Table: "customers",
-      page: searchForm.value.page,
-      page_size: searchForm.value.page_size,
-      ORDER_da: " DESC",
+      Type: "delete",
+    };
+
+    try {
+      const response = await api(requestData);
+      console.log(response);
+      if (response.status.error_msg === "success") {
+        ElMessage.success("删除成功");
+        getListData();
+      } else {
+        ElMessage.error("删除失败！");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+};
+//新增账号
+const add_dialogVisible = ref(false);
+const add = async () => {
+  let ii = searchForm.value;
+  const in_data = {
+    Type: "customers_add",
+    Table: "customers",
+    customer_name: ii.customer_name,
+    phone: ii.phone,
+    wechat: ii.wechat,
+    address: ii.address,
+    type: ii.type,
+    level: ii.level,
+  };
+  console.log(in_data);
+  await api(in_data)
+    .then((res) => {
+      console.log(res);
+      if (res.status.error_msg == "success") {
+        ElMessage.success("新建成功");
+        add_dialogVisible.value = false;
+        getListData();
+      } else {
+        ElMessage.error("新建失败！");
+      }
+    })
+    .catch((err) => {});
+};
+//编辑账号
+const up_dialogVisible = ref(false);
+const up_bu = (row) => {
+  searchForm.value.customer_name = row.customer_name;
+  searchForm.value.phone = row.phone;
+  searchForm.value.wechat = row.wechat;
+  searchForm.value.address = row.address;
+  searchForm.value.type = row.type;
+  searchForm.value.level = row.level;
+  searchForm.value.id = row.id;
+  up_dialogVisible.value = true;
+  console.log(searchForm.value);
+};
+
+const up = async () => {
+  let ii = searchForm.value;
+  const in_data = {
+    Type: "customers_up",
+    Table: "customers",
+    customer_name: ii.customer_name,
+    phone: ii.phone,
+    wechat: ii.wechat,
+    address: ii.address,
+    type: ii.type,
+    level: ii.level,
+    id: ii.id,
+  };
+  loading.value = true;
+  await api(in_data)
+    .then((res) => {
+      console.log(res);
+      if (res.status.error_msg == "success") {
+        ElMessage.success("更新成功");
+        up_dialogVisible.value = false;
+        loading.value = false;
+        getListData();
+      } else {
+        ElMessage.error("更新失败！");
+      }
+    })
+    .catch((err) => {});
+};
+// 查询操作
+const options = [
+  {
+    value: "customer_name",
+    label: "客户名",
+  },
+  {
+    value: "phone",
+    label: "电话",
+  },
+  {
+    value: "address",
+    label: "地址",
+  },
+  {
+    value: "wechat",
+    label: "微信",
+  },
+  {
+    value: "level",
+    label: "用户等级",
+  },
+  
+];
+const remoteMethod = async () => {
+  if (searchForm.value.field) {
+    loading.value = true;
+    tableData.value = [];
+    let in_data = {
+      Type: "search",
+      Table: "customers",
+      condition_name1: searchForm.value.field,
+      condition1: searchForm.value.content,
     };
     await api(in_data)
       .then((res) => {
-        console.log(res);
-        if (res.status.error_msg == "success") {
-          setTimeout(() => {
-            tableData.value = res.bizobj;
-            total.value = Number(res.page_info.total_items);
-            loading.value = false;
-          }, 1000);
-        } else {
-          ElMessage.error("查询失败！");
-        }
         loading.value = false;
-        r;
+        if (res.status.error_msg == "success") {
+          tableData.value = res.data;
+          total.value = 0;
+        } else {
+          ElMessage.error("无数据！");
+        }
       })
       .catch((err) => {
         loading.value = false;
       });
-  };
-
-  getListData();
-
-  /**
-   * 删除按钮点击事件
-   */
-  const onRemoveClick = async (row) => {
-    const confirmResult = await ElMessageBox.confirm(
-      "确定要删除【" + row.customer_name + "】这个客户吗",
-      {
-        type: "warning",
-      }
-    ).catch((err) => {
-      console.error(err);
-    });
-
-    if (confirmResult) {
-      const requestData = {
-        id: row.id,
-        Table: "customers",
-        Type: "delete",
-      };
-
-      try {
-        const response = await api(requestData);
-        console.log(response);
-        if (response.status.error_msg === "success") {
-          ElMessage.success("删除成功");
-          getListData();
-        } else {
-          ElMessage.error("删除失败！");
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  };
-  //新增账号
-  const add_dialogVisible = ref(false);
-  const add = async () => {
-    let ii = searchForm.value;
-    const in_data = {
-      Type: "customers_add",
-      Table: "customers",
-      customer_name: ii.customer_name,
-      phone: ii.phone,
-      wechat: ii.wechat,
-      address: ii.address,
-      type: ii.type,
-      level: ii.level,
-    };
-    console.log(in_data);
-    await api(in_data)
-      .then((res) => {
-        console.log(res);
-        if (res.status.error_msg == "success") {
-          ElMessage.success("新建成功");
-          add_dialogVisible.value = false;
-          getListData();
-        } else {
-          ElMessage.error("新建失败！");
-        }
-      })
-      .catch((err) => { });
-  };
-  //编辑账号
-  const up_dialogVisible = ref(false);
-  const up_bus = (row) => {
-    console.log(row);
-    searchForm.value.customer_name = row.customer_name;
-    searchForm.value.phone = row.phone;
-    searchForm.value.wechat = row.wechat;
-    searchForm.value.address = row.address;
-    searchForm.value.type = row.type;
-    searchForm.value.level = row.level;
-    searchForm.value.id = row.id;
-    up_dialogVisible.value = true;
-    
-  };
-
-  const up = async () => {
-    let ii = searchForm.value;
-    const in_data = {
-      Type: "customers_up",
-      Table: "customers",
-      customer_name: ii.customer_name,
-      phone: ii.phone,
-      wechat: ii.wechat,
-      address: ii.address,
-      type: ii.type,
-      level: ii.level,
-      id: ii.id,
-    };
-    loading.value = true;
-    await api(in_data)
-      .then((res) => {
-        console.log(res);
-        if (res.status.error_msg == "success") {
-          ElMessage.success("更新成功");
-          up_dialogVisible.value = false;
-          loading.value = false;
-          getListData();
-        } else {
-          ElMessage.error("更新失败！");
-        }
-      })
-      .catch((err) => { });
-  };
-  // 查询操作
-  const options = [
-    {
-      value: "customer_name",
-      label: "客户名",
-    },
-    {
-      value: "phone",
-      label: "电话",
-    },
-    {
-      value: "address",
-      label: "地址",
-    },
-    {
-      value: "wechat",
-      label: "微信",
-    },
-    {
-      value: "level",
-      label: "用户等级",
-    },
-
-  ];
-  const remoteMethod = async () => {
-    if (searchForm.value.field) {
-      loading.value = true;
-      tableData.value = [];
-      let in_data = {
-        Type: "search",
-        Table: "customers",
-        condition_name1: searchForm.value.field,
-        condition1: searchForm.value.content,
-      };
-      await api(in_data)
-        .then((res) => {
-          loading.value = false;
-          if (res.status.error_msg == "success") {
-            tableData.value = res.bizobj;
-            total.value = 0;
-          } else {
-            ElMessage.error("无数据！");
-          }
-        })
-        .catch((err) => {
-          loading.value = false;
-        });
-    }
-  };
+  }
+};
 </script>
 
-  <style lang="scss" scoped>
-  .home-box {
-    .header {
-      margin-bottom: 22px;
-      text-align: right;
-    }
-
-    ::v-deep .el-tag {
-      margin-right: 6px;
-    }
-
-    ::v-deep .avatar {
-      width: 60px;
-      height: 60px;
-      border-radius: 13%;
-    }
+<style lang="scss" scoped>
+.home-box {
+  .header {
+    margin-bottom: 22px;
+    text-align: right;
   }
+
+  ::v-deep .el-tag {
+    margin-right: 6px;
+  }
+
+  ::v-deep .avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 13%;
+  }
+}
 </style>

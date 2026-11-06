@@ -15,7 +15,7 @@
           </el-button>
         </el-form-item>
         <el-form-item>
-          <el-button @click="czz"><el-icon>
+          <el-button @click="getListData"><el-icon>
               <HelpFilled />
             </el-icon>重置</el-button>
         </el-form-item>
@@ -32,7 +32,7 @@
   </div>
   <div class="home-box">
     <el-card>
-      <el-table :data="tableData" show-summary v-loading="loading" element-loading-text="加载中..." border>
+      <el-table :data="tableData" v-loading="loading" element-loading-text="加载中..." border>
         <el-table-column prop="creator" label="创建人" align="center" width="102">
         </el-table-column>
         <el-table-column prop="state" label="审核状态" fixed="left" align="center" width="90">
@@ -67,11 +67,11 @@
         </el-table-column>
         <el-table-column prop="created_time" label="创建时间" align="center" width="170">
         </el-table-column>
-        <!-- <el-table-column label="操作" width="98" align="center" fixed="left">
+        <el-table-column label="操作" width="98" align="center" fixed="left">
           <template #default="{ row }">
             <el-button plain @click="up_bu(row)">编辑</el-button>
           </template>
-        </el-table-column> -->
+        </el-table-column>
       </el-table>
 
       <!--分页组件-->
@@ -114,7 +114,7 @@ const searchForm = ref({
 
   time: "",
   page: 1,
-  page_size: 20,
+  page_size: 100,
 
   row: ''
 });
@@ -128,10 +128,6 @@ onMounted(() => {
   getListData();
 });
 const getListData = async () => {
-  if (searchForm.value.field) {
-    remoteMethod();
-    return
-  }
   loading.value = true;
   let in_data = {
     Type: "get",
@@ -144,7 +140,7 @@ const getListData = async () => {
       loading.value = false;
       if (res.status.error_msg == "success") {
         setTimeout(() => {
-          tableData.value = res.bizobj;
+          tableData.value = res.data;
           total.value = Number(res.page_info.total_items);
         }, 200);
       } else {
@@ -168,7 +164,7 @@ const outexxx = async () => {
         loading.value = false;
         if (res.status.error_code == 0) {
           ElMessage.success(res.status.error_msg);
-          window.location.replace(res.bizobj);
+          window.location.replace(res.data);
         } else {
           ElMessage.error(res.status.error_msg);
         }
@@ -243,8 +239,8 @@ const remoteMethod = async () => {
       .then((res) => {
         loading.value = false;
         if (res.status.error_msg == "success") {
-          tableData.value = res.bizobj;
-          total.value = Number(res.page_info.total_items);
+          tableData.value = res.data;
+          total.value = 0;
         } else {
           ElMessage.error("无数据！");
         }
@@ -253,15 +249,6 @@ const remoteMethod = async () => {
         loading.value = false;
       });
   }
-};
-const czz = () => {
-  searchForm.value.page = 1;
-  searchForm.value.page_size = 10;
-  searchForm.value.Search_Date_time = '';
-  searchForm.value.field = ""; //搜索字段
-  searchForm.value.content = ""; //搜索内容
-  searchForm.value.content2 = ""; //搜索内容
-  getListData();
 };
 
 </script>

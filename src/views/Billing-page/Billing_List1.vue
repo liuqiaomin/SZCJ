@@ -1,18 +1,41 @@
 <template>
   <div class="home-box">
     <el-card>
-      <el-table :data="tableData" v-loading="loading" element-loading-text="加载中..." border>
-        <el-table-column prop="id" label="订单iD" align="center" width="90">
-        </el-table-column>
+      <el-table
+        :data="tableData"
+        v-loading="loading"
+        element-loading-text="加载中..."
+        border
+      >
         <el-table-column prop="customer_name" label="客户名" align="center" width="200">
         </el-table-column>
-        <el-table-column prop="order_total_price" label="订单总价" align="center" width="120">
+        <el-table-column
+          prop="order_total_price"
+          label="订单总价"
+          align="center"
+          width="120"
+        >
         </el-table-column>
-        <el-table-column prop="customer_level" label="客户等级" align="center" width="120">
+        <el-table-column
+          prop="customer_level"
+          label="客户等级"
+          align="center"
+          width="120"
+        >
         </el-table-column>
-        <el-table-column prop="customer_phone" label="客户电话" align="center" width="130">
+        <el-table-column
+          prop="customer_phone"
+          label="客户电话"
+          align="center"
+          width="130"
+        >
         </el-table-column>
-        <el-table-column prop="customer_address" label="客户地址" align="center" width="300">
+        <el-table-column
+          prop="customer_address"
+          label="客户地址"
+          align="center"
+          width="300"
+        >
         </el-table-column>
         <el-table-column prop="created_by" label="开单人" align="center" width="180">
         </el-table-column>
@@ -25,23 +48,26 @@
 
         <el-table-column label="交付图" align="center" width="95">
           <template #default="{ row }">
-            <el-image class="avatar" :src="row.receipt_photo" :z-index="10" :preview-src-list="[row.receipt_photo]"
-              preview-teleported>
+            <el-image
+              class="avatar"
+              :src="row.receipt_photo"
+              :z-index="10"
+              :preview-src-list="[row.receipt_photo]"
+              preview-teleported
+            >
             </el-image>
-          </template>
-        </el-table-column>
-        <el-table-column label="派单" width="88" align="center" fixed="left">
-          <template #default="{ row }">
-            <el-button type="primary" plain @click="Transferorder_tcbu(row)">
-              派单
-            </el-button>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="268" align="center" fixed="right">
           <template #default="{ row }">
             <el-button plain @click="up_bu(row)">编辑地址</el-button>
             <el-button type="primary" plain @click="onShowClick(row)">查看</el-button>
-            <el-button v-if="row.print_id == 0" type="primary" plain @click="API_PHP_DEMObu(row)">
+            <el-button
+              v-if="row.print_id == 0"
+              type="primary"
+              plain
+              @click="API_PHP_DEMObu(row)"
+            >
               打印
             </el-button>
             <el-button v-else plain @click="API_PHP_DEMObu(row)"> 打印 </el-button>
@@ -50,45 +76,31 @@
       </el-table>
 
       <!--分页组件-->
-      <pagination v-show="total > 0" :total="total" v-model:page="searchForm.page" v-model:limit="searchForm.page_size"
-        @pagination="getListData" />
+      <pagination
+        v-show="total > 0"
+        :total="total"
+        v-model:page="searchForm.page"
+        v-model:limit="searchForm.page_size"
+        @pagination="getListData"
+      />
     </el-card>
 
     <el-dialog v-model="up_dialogVisible" title="编辑地址" width="30%">
-      <el-form label-position="top"><el-form-item label="收货店名" prop="customer_name">
+      <el-form label-position="top"
+        ><el-form-item label="收货店名" prop="customer_name">
           <el-input v-model="searchForm.row.customer_name" disabled></el-input>
         </el-form-item>
         <el-form-item label="收货地址" prop="customer_address">
-          <el-input v-model="searchForm.row.customer_address" placeholder="请输入收货地址"></el-input>
+          <el-input
+            v-model="searchForm.row.customer_address"
+            placeholder="请输入收货地址"
+          ></el-input>
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="up_dialogVisible = false">取消</el-button>
           <el-button type="primary" @click="up">更新</el-button>
-        </span>
-      </template>
-    </el-dialog>
-    <!-- 派单 -->
-    <el-dialog v-model="Transferorder_tc" title="发起派单" width="30%">
-      <el-form label-position="top">
-        <el-form-item label="选择配送员" prop="category">
-          <el-radio-group v-model="searchForm.psy" @change="handleRadioChange">
-            <!-- 使用v-for遍历商品分类 -->
-            <el-radio v-for="(item, index) in pstableData" :key="index" :label="item.username" :value="item"></el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="收货店名" prop="customer_name">
-          <el-input v-model="searchForm.row.customer_name" disabled></el-input>
-        </el-form-item>
-        <el-form-item label="收货地址" prop="customer_address">
-          <el-input v-model="searchForm.row.customer_address" disabled></el-input>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="Transferorder_tc = false">取消</el-button>
-          <el-button type="primary" @click="Transferorder">确定转单</el-button>
         </span>
       </template>
     </el-dialog>
@@ -114,12 +126,11 @@ const searchForm = ref({
   role: "",
   date: "",
   page: 1,
-  page_size: 100,
+  page_size: 10,
   row: "",
 });
 
 const tableData = ref([]);
-const pstableData = ref([]);
 const total = ref(0);
 const loading = ref(false);
 const roleList = ref([]);
@@ -143,7 +154,7 @@ const getListData = async () => {
     Table: "order_list",
     page: searchForm.value.page,
     page_size: searchForm.value.page_size,
-    condition_name1: "state",
+    condition_name1: "Warehouse_sh",
     condition1: 1,
   };
   await api(in_data)
@@ -151,7 +162,7 @@ const getListData = async () => {
       console.log(res);
       if (res.status.error_msg == "success") {
         setTimeout(() => {
-          tableData.value = res.bizobj;
+          tableData.value = res.data;
           total.value = Number(res.page_info.total_items);
           loading.value = false;
         }, 1000);
@@ -166,29 +177,6 @@ const getListData = async () => {
     });
 };
 getListData();
-//  * 获取账号列表
-//  */
-const psData = async () => {
-  loading.value = true;
-  let in_data = {
-    Type: "Jsearch",
-    Table: "adminList",
-    page: 1,
-    page_size: 1000,
-    condition_name1: "role_name",
-    condition1: "配送员",
-  };
-  await api(in_data).then((res) => {
-    console.log(res);
-    if (res.status.error_msg == "success") {
-      pstableData.value = res.bizobj;
-    } else {
-      ElMessage.error("查询失败！");
-    }
-  });
-};
-psData();
-
 const add_LiSt = () => {
   router.push({
     path: "/Billing/Billing_add",
@@ -222,7 +210,7 @@ const API_PHP_DEMObu = async (row) => {
         ElMessage.error("发起打印失败！");
       }
     })
-    .catch((err) => { });
+    .catch((err) => {});
 };
 
 //编辑账号
@@ -253,47 +241,7 @@ const up = async () => {
         ElMessage.error("更新失败！");
       }
     })
-    .catch((err) => { });
-};
-
-//派单
-const Transferorder_tc = ref(false);
-const Transferorder_tcbu = (row) => {
-  searchForm.value.row = row;
-  Transferorder_tc.value = true;
-  console.log(searchForm.value.row);
-};
-
-const handleRadioChange = (value) => {
-  console.log("被选中的用户名:", value);
-  const Item = pstableData.value.find((item) => item.username === value);
-  if (Item) {
-    console.log("被选中的item:", Item);
-    searchForm.value.psitem = Item;
-    // 在这里你可以使用selectedItem做你想做的事情
-  }
-};
-const Transferorder = async () => {
-  let ii = searchForm.value;
-  const in_data = {
-    Type: "Transferorder",
-    Table: "order_list",
-    id: ii.row.id, //订单ID
-    delivery_person_id: ii.psitem.id, //配送员ID
-    delivery_person: ii.psitem.username, //配送员名字
-  };
-  await api(in_data)
-    .then((res) => {
-      console.log(res);
-      if (res.status.error_code == 0) {
-        ElMessage.success(res.status.error_msg);
-        Transferorder_tc.value = false;
-        getListData();
-      } else {
-        ElMessage.error("更新失败！");
-      }
-    })
-    .catch((err) => { });
+    .catch((err) => {});
 };
 </script>
 

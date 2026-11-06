@@ -11,66 +11,48 @@
                     <el-input v-model="searchForm.content" placeholder="请输入要搜索的内容" class="handle-input mr10"
                         clearable></el-input>
                 </el-form-item>
-                <el-form-item label="搜索时间" prop="Search_Date_time">
-                    <el-date-picker v-model="searchForm.Search_Date_time" type="datetimerange" :shortcuts="shortcuts"
-                        format="YYYY/MM/DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" range-separator="至"
-                        start-placeholder="开始日期" end-placeholder="结束日期" />
-                </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="remoteMethod" style="margin-left: -16px">查询搜索
-                    </el-button>
-                </el-form-item>
-                <el-form-item>
-                    <el-button @click="czz">
-                        <el-icon>
+                    </el-button></el-form-item><el-form-item>
+                    <el-button @click="getListData"><el-icon>
                             <HelpFilled />
-                        </el-icon>重置
-                    </el-button>
-                </el-form-item>
+                        </el-icon>重置</el-button></el-form-item>
             </el-form>
         </el-card>
         <el-card>
-            <el-table :data="tableData" show-summary v-loading="loading" element-loading-text="加载中..." border>
-                <el-table-column prop="id" label="订单iD" align="center" width="90">
-                </el-table-column>
-                <el-table-column prop="created_by" label="开单人" align="center" width="180">
-                </el-table-column>
-
-                <el-table-column prop="customer_name" label="客户名" align="center" width="200">
-                </el-table-column>
-
-                <el-table-column prop="order_total_price" label="订单总价" align="center" width="120">
-                </el-table-column>
-
-                <el-table-column prop="created_time" label="开单时间" align="center" width="180">
-                </el-table-column>
-                <el-table-column prop="customer_address" label="客户地址" align="center" width="300">
-                </el-table-column>
-                <el-table-column prop="customer_phone" label="客户电话" align="center" width="130">
-                </el-table-column>
-                <el-table-column label="订单状态" align="center" width="100">
+            <el-table :data="tableData" v-loading="loading" element-loading-text="加载中..." border>
+                <el-table-column label="订单类型" align="center" width="100">
                     <template #default="{ row }">
-                        {{ row.state == 0 ? '待审核出库' :
-                            row.state == 1 ? '已出库 待分配' :
-                                row.state == 2 ? '配送中' :
-                                    row.state == 3 ? '已完成' :
-                                        row.state == 5 ? '退货中' :
-                                            row.state == 6 ? '退单申请中' :
-                                                row.state == 7 ? '已取消' :
-                                                    '待分配' }}
+                        {{ row.XY == 1 ? '小程序订单' : '线下订单' }}
                     </template>
-                </el-table-column>
-                <el-table-column label="订单类型" align="center" width="150">
-                    <template #default="{ row }">
-                        {{ row.XY == 1 ? '小程序订单' : row.XY == 0 ? '后台线下订单' : row.XY == 2 ? '手机端下单' : '小程序预售' }}
-                    </template>
-                </el-table-column>
-                <el-table-column prop="customer_level" label="客户等级" align="center" width="120">
                 </el-table-column>
                 <el-table-column label="配送类型" align="center" width="100">
                     <template #default="{ row }">
                         {{ row.mode == 0 ? '配送' : '自提' }}
                     </template>
+                </el-table-column>
+                <el-table-column label="订单状态" align="center" width="100">
+                    <template #default="{ row }">
+{{ row.state == 0 ? '待分配' : row.state
+                            == 2 ? '配送中' : row.state == 3 ? '已完成' : row.state == 5 ? '退货中' : row.state == 6 ? '退单申请中' :
+                                row.state == 7 ? '已取消' : '其他' }}
+                    </template>
+                </el-table-column>
+                <el-table-column prop="id" label="订单iD" align="center" width="90">
+                </el-table-column>
+                <el-table-column prop="customer_name" label="客户名" align="center" width="200">
+                </el-table-column>
+                <el-table-column prop="order_total_price" label="订单总价" align="center" width="120">
+                </el-table-column>
+                <el-table-column prop="customer_level" label="客户等级" align="center" width="120">
+                </el-table-column>
+                <el-table-column prop="customer_phone" label="客户电话" align="center" width="130">
+                </el-table-column>
+                <el-table-column prop="customer_address" label="客户地址" align="center" width="300">
+                </el-table-column>
+                <el-table-column prop="created_by" label="开单人" align="center" width="180">
+                </el-table-column>
+                <el-table-column prop="created_time" label="开单时间" align="center" width="180">
                 </el-table-column>
                 <el-table-column prop="print_id" label="打印次数" align="center" width="120">
                 </el-table-column>
@@ -114,50 +96,15 @@ const router = useRouter();
 
 const showSearch = ref(true);
 
-const Search_Date_time = ref('')
-
-const shortcuts = [
-    {
-        text: '最近一周',
-        value: () => {
-            const end = new Date()
-            const start = new Date()
-            start.setDate(start.getDate() - 7)
-            return [start, end]
-        },
-    },
-    {
-        text: '最近一个月',
-        value: () => {
-            const end = new Date()
-            const start = new Date()
-            start.setMonth(start.getMonth() - 1)
-            return [start, end]
-        },
-    },
-    {
-        text: '最近三个月',
-        value: () => {
-            const end = new Date()
-            const start = new Date()
-            start.setMonth(start.getMonth() - 3)
-            return [start, end]
-        },
-    },
-]
-
 //数据源
 const searchForm = ref({
     id: 0,
     Regional_barcode: "",
-    row: "",
     role: "",
     date: "",
     page: 1,
     page_size: 10,
-
-
-    Search_Date_time: '',
+    row: "",
     field: "", //搜索字段
     content: "", //搜索内容
     content2: "", //搜索内容
@@ -168,9 +115,9 @@ const total = ref(0);
 const loading = ref(false);
 const roleList = ref([]);
 
-onMounted(() => {
-    getListData();
-});
+ onMounted(() => {
+getListData();
+ });
 // watch(
 //   () => router.currentRoute.value,
 //   () => {
@@ -181,12 +128,6 @@ onMounted(() => {
  * 获取商品列表
  */
 const getListData = async () => {
-
-    if (searchForm.value.field) {
-        console.log('调用搜索')
-        remoteMethod();
-        return
-    }
     loading.value = true;
     let in_data = {
         Type: "get",
@@ -198,29 +139,27 @@ const getListData = async () => {
         .then((res) => {
             console.log(res);
             if (res.status.error_msg == "success") {
-                tableData.value = res.bizobj;
-                total.value = Number(res.page_info.total_items);
                 setTimeout(() => {
+                    tableData.value = res.data;
+                    total.value = Number(res.page_info.total_items);
                     loading.value = false;
                 }, 1000);
             } else {
                 ElMessage.error("查询失败！");
             }
             loading.value = false;
+            r;
         })
         .catch((err) => {
             loading.value = false;
         });
 };
 
-const czz = () => {
-    searchForm.value.page = 1;
-    searchForm.value.page_size = 10;
-    searchForm.value.Search_Date_time = '';
-    searchForm.value.field = ""; //搜索字段
-    searchForm.value.content = ""; //搜索内容
-    searchForm.value.content2 = ""; //搜索内容
-    getListData();
+const add_LiSt = () => {
+    router.push({
+        path: "/Billing/Billing_add",
+        // query: row,
+    });
 };
 /**
  * 查看按钮点击事件
@@ -281,20 +220,18 @@ const remoteMethod = async () => {
         loading.value = true;
         tableData.value = [];
         let in_data = {
-            Type: "Search_Date",
+            Type: "search",
             Table: "order_list",
             condition_name1: searchForm.value.field,
             condition1: searchForm.value.content,
-            Search_Date_time: JSON.stringify(searchForm.value.Search_Date_time),
-            page: searchForm.value.page,
-            page_size: searchForm.value.page_size
+            page_size: 10000,
         };
         await api(in_data)
             .then((res) => {
                 loading.value = false;
                 if (res.status.error_msg == "success") {
-                    tableData.value = res.bizobj;
-                    total.value = res.count;
+                    tableData.value = res.data;
+                    total.value = 0;
                 } else {
                     ElMessage.error("无数据！");
                 }

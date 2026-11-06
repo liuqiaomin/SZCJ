@@ -121,8 +121,8 @@ const order_list_xq = async () => {
     .then((res) => {
       console.log(res);
       if (res.status.error_msg == "success") {
-        form.customers_list = res.bizobj;
-        tableData.value = JSON.parse(res.bizobj.tableData);
+        form.customers_list = res.data;
+        tableData.value = JSON.parse(res.data.tableData);
         get_tableData();
       } else {
         ElMessage.error("查询失败！");

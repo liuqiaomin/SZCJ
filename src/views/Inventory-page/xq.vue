@@ -65,7 +65,7 @@ let id = route.query.id;
 const searchForm = reactive({
   id: "",
   page: 1,
-  page_size: 10,
+  page_size: 100,
 });
 
 onMounted(() => {
@@ -88,13 +88,15 @@ const getListData = async () => {
     page: searchForm.page,
     page_size: searchForm.page_size,
   };
+  console.log(route.query.id);
   await api(in_data)
     .then((res) => {
       console.log(res);
-      tableData.value = res.bizobj;
-      total.value = res.count;
+      tableData.value = res.data;
+      total.value = Number(res.page_info.total_items);
       setTimeout(() => {
         loading.value = false;
+
       }, 1000);
     })
     .catch((err) => {

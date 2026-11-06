@@ -179,7 +179,7 @@ const getListData = async () => {
       console.log(res);
       if (res.status.error_msg == "success") {
         setTimeout(() => {
-          tableData.value = res.bizobj;
+          tableData.value = res.data;
           total.value = Number(res.page_info.total_items);
           loading.value = false;
         }, 1000);
@@ -276,7 +276,7 @@ const remoteMethod = async () => {
       .then((res) => {
         loading.value = false;
         if (res.status.error_msg == "success") {
-          tableData.value = res.bizobj;
+          tableData.value = res.data;
           total.value = 0;
         } else {
           ElMessage.error("无数据！");

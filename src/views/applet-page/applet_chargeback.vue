@@ -114,8 +114,10 @@ const loading = ref(false);
 const getListData = async () => {
   loading.value = true;
   let in_data = {
-    Type: "applet_chargeback_get",
+    Type: "Jsearch",
     Table: "order_list",
+    condition_name1: "state",
+    condition1: 6,
     page: searchForm.value.page,
     page_size: searchForm.value.page_size,
   };
@@ -124,7 +126,7 @@ const getListData = async () => {
       console.log(res);
       if (res.status.error_msg == "success") {
         setTimeout(() => {
-          tableData.value = res.bizobj;
+          tableData.value = res.data;
           total.value = Number(res.page_info.total_items);
           loading.value = false;
         }, 1000);
@@ -202,7 +204,7 @@ const remoteMethod = async () => {
       .then((res) => {
         loading.value = false;
         if (res.status.error_msg == "success") {
-          tableData.value = res.bizobj;
+          tableData.value = res.data;
           total.value = Number(res.page_info.total_items);
         } else {
           ElMessage.error("无数据！");

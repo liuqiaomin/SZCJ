@@ -2,15 +2,22 @@
   <div class="diva">
     <div class="container">
       <el-form label-position="right" label-width="100px" :model="form" size="large">
-        <el-form-item label="商品名" prop="product_name" label-width="100">
-          <el-input v-model="form.product_name"></el-input>
+        <!-- 商品名 -->
+        <el-form-item label="商品名" prop="product_name">
+          <el-input v-model="form.product_name" />
         </el-form-item>
-        <el-form-item label="商品排序" prop="Sort" label-width="100">
-          <el-input v-model="form.Sort" placeholder="值越小排名越高"></el-input>
+
+        <!-- 商品排序 -->
+        <el-form-item label="商品排序" prop="Sort">
+          <el-input v-model="form.Sort" placeholder="值越小排名越高" />
         </el-form-item>
-        <el-form-item label="商品条码" prop="Regional_barcode" label-width="100">
-          <el-input v-model="form.Regional_barcode"></el-input>
+
+        <!-- 商品条码 -->
+        <el-form-item label="商品条码" prop="Regional_barcode">
+          <el-input v-model="form.Regional_barcode" />
         </el-form-item>
+
+        <!-- 商品状态 -->
         <el-form-item label="商品状态" prop="product_status">
           <el-switch
             v-model="form.product_status"
@@ -19,144 +26,162 @@
             inactive-text="下架"
           />
         </el-form-item>
-        <el-form-item label="主图" prop="form.main_image">
+
+        <!-- 主图 -->
+        <el-form-item label="主图" prop="main_image">
           <el-upload
             class="upload-demo"
             drag
-            action="https://xcx.szhxch.com/i.php"
-            multiple
-            :on-change="img_handle"
+            action="/admin/upload"
+            :show-file-list="false"
+            :on-success="img_handle"
           >
             <el-icon class="el-icon--upload"><upload-filled /></el-icon>
             <div class="el-upload__text">
-              将jpg/png/webp图片拖到此处，或
-              <em>点击上传</em>
+              将 jpg / png / webp 图片拖到此处，或 <em>点击上传</em>
             </div>
           </el-upload>
+
+          <div v-if="form.main_image" class="mt-2">
+            <el-image
+              :src="form.main_image"
+              style="width: 120px; height: 120px"
+              fit="cover"
+            />
+          </div>
         </el-form-item>
-        <el-form-item label="多图" prop="form.multi_images">
+
+        <!-- 多图 -->
+        <el-form-item label="多图" prop="multi_images">
           <el-upload
-            action="https://xcx.szhxch.com/i.php"
+            action="/admin/upload"
             list-type="picture-card"
             :on-preview="handlePictureCardPreview"
             :on-success="img_handle2"
+            :on-remove="img_remove"
             multiple
           >
             <el-icon><Plus /></el-icon>
           </el-upload>
 
-          <el-dialog>
+          <el-dialog v-model="dialogVisible">
             <img w-full :src="dialogImageUrl" alt="Preview Image" />
           </el-dialog>
         </el-form-item>
-        <el-form-item label="规格" prop="specification" label-width="100">
-          <el-input v-model="form.specification"></el-input>
-        </el-form-item>
-        <el-form-item label="单位" prop="specification_quantity">
-          <el-input v-model="form.specification_quantity"></el-input>
-        </el-form-item>
-        <el-form-item label="库存" prop="stock">
-          <el-input v-model="form.stock"></el-input>
-        </el-form-item>
-        <!-- <el-form-item label="商品分类" prop="category">
-          <el-radio-group v-model="form.category">
-            <el-radio label="商超卖点"></el-radio>
-            <el-radio label="环保降解类"></el-radio>
-            <el-radio label="纸巾系列"></el-radio>
-            <el-radio label="竹木系列"></el-radio>
-            <el-radio label="环保方形"></el-radio>
-            <el-radio label="环保圆形"></el-radio>
-            <el-radio label="环保袋系列"></el-radio>
-            <el-radio label="清洁用品"></el-radio>
-            <el-radio label="套装类"></el-radio>
-            <el-radio label="发泡系列"></el-radio>
-            <el-radio label="锡铝系列"></el-radio>
-            <el-radio label="其它"></el-radio>
-            <el-radio label="杯类"></el-radio>
-            <el-radio label="水杯类"></el-radio>
-          </el-radio-group>
-        </el-form-item> -->
-        <el-form-item label="商品分类" prop="category">
-          <el-radio-group v-model="form.category">
-            <!-- 使用v-for遍历商品分类 -->
-            <el-radio
-              v-for="(item, index) in tableData"
-              :key="index"
-              :label="item.category_name"
-            ></el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="单价" prop="unit_price" label-width="100">
-          <el-input v-model="form.unit_price"></el-input>
-        </el-form-item>
-        <el-form-item label="进货价" prop="Purchase_price" label-width="100">
-          <el-input v-model="form.Purchase_price"></el-input>
-        </el-form-item>
-        <el-form-item label="一级（零售）单价" prop="retail_price" label-width="150">
-          <el-input v-model="form.retail_price"></el-input>
-        </el-form-item>
-        <el-form-item label="二级餐厅单价" prop="grocery_price" label-width="150">
-          <el-input v-model="form.grocery_price"></el-input>
-        </el-form-item>
-        <el-form-item
-          label="三级粮油单价"
-          prop="department_store_price"
-          label-width="150"
-        >
-          <el-input v-model="form.department_store_price"></el-input>
+
+        <!-- 规格 -->
+        <el-form-item label="规格" prop="specification">
+          <el-input v-model="form.specification" />
         </el-form-item>
 
-        <el-form-item label="四级内部优惠单价" prop="wholesale_price" label-width="150">
-          <el-input v-model="form.wholesale_price"></el-input>
+        <!-- 单位 -->
+        <el-form-item label="单位" prop="specification_quantity">
+          <el-input v-model="form.specification_quantity" />
         </el-form-item>
+
+        <!-- 库存 -->
+        <el-form-item label="库存" prop="stock">
+          <el-input v-model="form.stock" />
+        </el-form-item>
+
+        <!-- 商品分类 -->
+        <el-form-item label="商品分类" prop="category">
+          <el-radio-group v-model="form.category">
+            <el-radio
+              v-for="item in tableData"
+              :key="item.id"
+              :label="item.category_name"
+            >
+              {{ item.category_name }}
+            </el-radio>
+          </el-radio-group>
+        </el-form-item>
+
+        <!-- 单价 -->
+        <el-form-item label="单价" prop="unit_price">
+          <el-input v-model="form.unit_price" />
+        </el-form-item>
+
+        <!-- 进货价 -->
+        <el-form-item label="进货价" prop="Purchase_price">
+          <el-input v-model="form.Purchase_price" />
+        </el-form-item>
+
+        <!-- 一级零售价 -->
+        <el-form-item label="一级（零售）单价" prop="retail_price" label-width="150">
+          <el-input v-model="form.retail_price" />
+        </el-form-item>
+
+        <!-- 二级餐厅价 -->
+        <el-form-item label="二级餐厅单价" prop="grocery_price" label-width="150">
+          <el-input v-model="form.grocery_price" />
+        </el-form-item>
+
+        <!-- 三级粮油价 -->
+        <el-form-item label="三级粮油单价" prop="department_store_price" label-width="150">
+          <el-input v-model="form.department_store_price" />
+        </el-form-item>
+
+        <!-- 四级内部优惠价 -->
+        <el-form-item label="四级内部优惠单价" prop="wholesale_price" label-width="150">
+          <el-input v-model="form.wholesale_price" />
+        </el-form-item>
+
+        <!-- 按件数设置价格一 -->
         <el-form-item label="按件数设置价格一" label-width="150">
           <el-row :gutter="20">
-            <el-col :span="12"
-              ><div />
+            <el-col :span="12">
               <el-form-item label="满多少件">
-                <el-input v-model="form.full_list[0].a"></el-input></el-form-item
-            ></el-col>
-            <el-col :span="12"
-              ><div />
+                <el-input v-model="form.full_list[0].a" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
               <el-form-item label="单价为多少">
-                <el-input v-model="form.full_list[0].b"></el-input> </el-form-item
-            ></el-col>
+                <el-input v-model="form.full_list[0].b" />
+              </el-form-item>
+            </el-col>
           </el-row>
         </el-form-item>
+
+        <!-- 按件数设置价格二 -->
         <el-form-item label="按件数设置价格二" label-width="150">
           <el-row :gutter="20">
-            <el-col :span="12"
-              ><div />
+            <el-col :span="12">
               <el-form-item label="满多少件">
-                <el-input v-model="form.full_list[1].a"></el-input></el-form-item
-            ></el-col>
-            <el-col :span="12"
-              ><div />
+                <el-input v-model="form.full_list[1].a" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
               <el-form-item label="单价为多少">
-                <el-input v-model="form.full_list[1].b"></el-input> </el-form-item
-            ></el-col>
+                <el-input v-model="form.full_list[1].b" />
+              </el-form-item>
+            </el-col>
           </el-row>
         </el-form-item>
+
+        <!-- 按件数设置价格三 -->
         <el-form-item label="按件数设置价格三" label-width="150">
           <el-row :gutter="20">
-            <el-col :span="12"
-              ><div />
+            <el-col :span="12">
               <el-form-item label="满多少件">
-                <el-input v-model="form.full_list[2].a"></el-input></el-form-item
-            ></el-col>
-            <el-col :span="12"
-              ><div />
+                <el-input v-model="form.full_list[2].a" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
               <el-form-item label="单价为多少">
-                <el-input v-model="form.full_list[2].b"></el-input> </el-form-item
-            ></el-col>
+                <el-input v-model="form.full_list[2].b" />
+              </el-form-item>
+            </el-col>
           </el-row>
         </el-form-item>
+
+        <!-- 商品详情 -->
         <el-form-item label="商品详情">
           <div class="mgb20" ref="editor"></div>
-          <!-- <el-button type="primary" @click="syncHTML">提交</el-button> -->
         </el-form-item>
+
         <el-row class="mb-1">
-          <el-button type="primary" @click="adds()">保存</el-button>
+          <el-button type="primary" @click="adds">保存</el-button>
         </el-row>
       </el-form>
     </div>
@@ -164,42 +189,50 @@
 </template>
 
 <script setup>
-import { ElMessageBox, ElMessage } from "element-plus";
+import { ElMessage } from "element-plus";
 import { api } from "@/api/api";
-import { ref, onMounted, onBeforeUnmount, watch, reactive } from "vue";
+import {
+  ref,
+  reactive,
+  onMounted,
+  onBeforeUnmount,
+  nextTick,
+} from "vue";
 import { useRouter } from "vue-router";
 import WangEditor from "wangeditor";
-
-//富文本编辑器
-const editor = ref(null);
-const content = reactive({
-  html: "",
-  text: "",
-});
-let instance = [];
-onMounted(() => {
-  instance = new WangEditor(editor.value);
-  instance.config.zIndex = 1;
-  instance.create();
-  getListData();
-});
-onBeforeUnmount(() => {
-  instance.destroy();
-  instance = null;
-});
-const syncHTML = () => {
-  content.html = instance.txt.html();
-  console.log(content.html);
-  form.fwb = content.html;
-};
+import { Plus, UploadFilled } from "@element-plus/icons-vue";
 
 const router = useRouter();
+
+// ==================== 富文本 ====================
+const editor = ref(null);
+let wangEditorInstance = null;
+
+onMounted(() => {
+  wangEditorInstance = new WangEditor(editor.value);
+  wangEditorInstance.config.zIndex = 1;
+  wangEditorInstance.create();
+  getListData();
+});
+
+onBeforeUnmount(() => {
+  wangEditorInstance?.destroy();
+  wangEditorInstance = null;
+});
+
+const syncHTML = () => {
+  if (wangEditorInstance) {
+    form.fwb = wangEditorInstance.txt.html();
+  }
+};
+
+// ==================== 表单 ====================
 const form = reactive({
   Type: "Presalelist_add",
   Table: "Presalelist",
   product_name: "",
   Regional_barcode: "",
-  product_status: "",
+  product_status: true,
   main_image: "",
   multi_images: "",
   specification: "",
@@ -212,104 +245,102 @@ const form = reactive({
   grocery_price: "",
   department_store_price: "",
   wholesale_price: "",
-  over_50_price: "",
-  over_100_price: "",
-  over_500_price: "",
-  fileList: [], //多图列表
+  fileList: [],
   Sort: "",
   fwb: "",
   full_list: [
-    {
-      a: 5,
-      b: 50,
-    },
-    {
-      a: 15,
-      b: 45,
-    },
-    {
-      a: 30,
-      b: 40,
-    },
+    { a: 5, b: 50 },
+    { a: 15, b: 45 },
+    { a: 30, b: 40 },
   ],
 });
-//上传主图
-const img_handle = (rawFile) => {
-  console.log(rawFile);
-  if (
-    rawFile.raw.type == "image/jpeg" ||
-    rawFile.raw.type == "image/png" ||
-    rawFile.raw.type == "image/webp"
-  ) {
-    form.main_image = rawFile.response;
+
+// ==================== 主图上传 ====================
+const img_handle = (response, uploadFile) => {
+  if (response && response.code === 0) {
+    form.main_image = response.data.url;
+    uploadFile.url = response.data.url;
+    ElMessage.success("主图上传成功");
   } else {
-    ElMessage.error("请上传jpg或png/webp图片！");
+    ElMessage.error(response?.msg || "主图上传失败");
   }
 };
-//上传多图
-const img_handle2 = (rawFile) => {
-  console.log(rawFile);
-  let i = {
-    url: rawFile,
-  };
-  console.log(i);
-  form.fileList.push(i);
+
+// ==================== 多图上传 ====================
+const img_handle2 = (response, uploadFile, uploadFiles) => {
+  if (response && response.code === 0) {
+    uploadFile.url = response.data.url;
+    form.fileList.push({
+      url: response.data.url,
+    });
+  } else {
+    ElMessage.error(response?.msg || "多图上传失败");
+  }
 };
-/**
- * 提交
- */
+
+// ==================== 多图删除 ====================
+const img_remove = (uploadFile, uploadFiles) => {
+  form.fileList = uploadFiles
+    .filter((file) => file.url)
+    .map((file) => ({
+      url: file.url,
+    }));
+};
+
+// ==================== 图片预览 ====================
+const dialogImageUrl = ref("");
+const dialogVisible = ref(false);
+
+const handlePictureCardPreview = (file) => {
+  dialogImageUrl.value = file.url;
+  dialogVisible.value = true;
+};
+
+// ==================== 提交 ====================
 const adds = async () => {
   syncHTML();
-  form.full_list2 = JSON.stringify(form.full_list);
-  form.oo = JSON.stringify(form.fileList);
-  await api(form)
+
+  const params = {
+    ...form,
+    full_list2: JSON.stringify(form.full_list),
+    oo: JSON.stringify(form.fileList),
+  };
+
+  await api(params)
     .then((res) => {
-      console.log(res);
-      if (res.status.error_msg == "success") {
+      if (res.status?.error_msg === "success") {
         ElMessage.success("新建成功");
         router.push({
           path: "/applet/Presalelist",
-          // query: row,
         });
       } else {
         ElMessage.error("新建失败！");
       }
     })
-    .catch((err) => {});
+    .catch(() => {
+      ElMessage.error("请求失败");
+    });
 };
-/**
- * 获取分类列表
- */
 
+// ==================== 获取分类 ====================
 const tableData = ref([]);
-const loading = ref(false);
+
 const getListData = async () => {
-  loading.value = true;
-  setTimeout(() => {
-    loading.value = false;
-  }, 1000);
-  let in_data = {
+  const in_data = {
     Type: "get",
     Table: "ProductCategory",
     ORDER_nane: "sort_order",
     ORDER_da: "ASC",
     page_size: 1000,
   };
+
   await api(in_data).then((res) => {
-    console.log(res);
-    if (res.status.error_msg == "success") {
-      tableData.value = res.bizobj;
+    if (res.status?.error_msg === "success") {
+      tableData.value = res.data || res.data || [];
     } else {
       ElMessage.error("分类查询失败！");
     }
   });
-};
-
-const dialogImageUrl = ref("");
-const dialogVisible = ref(false);
-const handlePictureCardPreview = (file) => {
-  dialogVisible.value = true;
-  dialogImageUrl.value = file.url;
 };
 </script>
 
@@ -318,5 +349,10 @@ const handlePictureCardPreview = (file) => {
   padding: 50px 200px 10px 200px;
   background-color: #ffffff;
   border-radius: 14px;
+  box-shadow: var(--el-box-shadow);
+}
+
+.mt-2 {
+  margin-top: 10px;
 }
 </style>

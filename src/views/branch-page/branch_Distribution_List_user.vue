@@ -125,7 +125,7 @@ const getListData = async () => {
         .then((res) => {
             if (res.status.error_msg == "success") {
                 setTimeout(() => {
-                    tableData.value = res.bizobj;
+                    tableData.value = res.data;
                     total.value = Number(res.page_info.total_items);
                     loading.value = false;
                 }, 100);
@@ -146,7 +146,7 @@ const dd_bu = (row) => {
         name: row.name
     };
     router.push({
-        path: "/applet/Distribution_List_order",
+        path: "/applet/Presalelist_order_list",
         query: i,
     });
 };

@@ -1,18 +1,41 @@
 <template>
   <div class="home-box">
     <el-card>
-      <el-table :data="tableData" v-loading="loading" element-loading-text="加载中..." border show-summary>
-        <el-table-column prop="id" label="订单iD" align="center" width="90">
-        </el-table-column>
+      <el-table
+        :data="tableData"
+        v-loading="loading"
+        element-loading-text="加载中..."
+        border
+      >
         <el-table-column prop="customer_name" label="客户名" align="center" width="200">
         </el-table-column>
-        <el-table-column prop="order_total_price" label="订单总价" align="center" width="120">
+        <el-table-column
+          prop="order_total_price"
+          label="订单总价"
+          align="center"
+          width="120"
+        >
         </el-table-column>
-        <el-table-column prop="customer_level" label="客户等级" align="center" width="120">
+        <el-table-column
+          prop="customer_level"
+          label="客户等级"
+          align="center"
+          width="120"
+        >
         </el-table-column>
-        <el-table-column prop="customer_phone" label="客户电话" align="center" width="130">
+        <el-table-column
+          prop="customer_phone"
+          label="客户电话"
+          align="center"
+          width="130"
+        >
         </el-table-column>
-        <el-table-column prop="customer_address" label="客户地址" align="center" width="300">
+        <el-table-column
+          prop="customer_address"
+          label="客户地址"
+          align="center"
+          width="300"
+        >
         </el-table-column>
         <el-table-column prop="created_by" label="开单人" align="center" width="180">
         </el-table-column>
@@ -25,8 +48,13 @@
 
         <el-table-column label="交付图" align="center" width="95">
           <template #default="{ row }">
-            <el-image class="avatar" :src="row.receipt_photo" :z-index="10" :preview-src-list="[row.receipt_photo]"
-              preview-teleported>
+            <el-image
+              class="avatar"
+              :src="row.receipt_photo"
+              :z-index="10"
+              :preview-src-list="[row.receipt_photo]"
+              preview-teleported
+            >
             </el-image>
           </template>
         </el-table-column>
@@ -34,7 +62,12 @@
           <template #default="{ row }">
             <el-button plain @click="up_bu(row)">编辑地址</el-button>
             <el-button type="primary" plain @click="onShowClick(row)">查看</el-button>
-            <el-button v-if="row.print_id == 0" type="primary" plain @click="API_PHP_DEMObu(row)">
+            <el-button
+              v-if="row.print_id == 0"
+              type="primary"
+              plain
+              @click="API_PHP_DEMObu(row)"
+            >
               打印
             </el-button>
             <el-button v-else plain @click="API_PHP_DEMObu(row)"> 打印 </el-button>
@@ -43,16 +76,25 @@
       </el-table>
 
       <!--分页组件-->
-      <pagination v-show="total > 0" :total="total" v-model:page="searchForm.page" v-model:limit="searchForm.page_size"
-        @pagination="getListData" />
+      <pagination
+        v-show="total > 0"
+        :total="total"
+        v-model:page="searchForm.page"
+        v-model:limit="searchForm.page_size"
+        @pagination="getListData"
+      />
     </el-card>
 
     <el-dialog v-model="up_dialogVisible" title="编辑地址" width="30%">
-      <el-form label-position="top"><el-form-item label="收货店名" prop="customer_name">
+      <el-form label-position="top"
+        ><el-form-item label="收货店名" prop="customer_name">
           <el-input v-model="searchForm.row.customer_name" disabled></el-input>
         </el-form-item>
         <el-form-item label="收货地址" prop="customer_address">
-          <el-input v-model="searchForm.row.customer_address" placeholder="请输入收货地址"></el-input>
+          <el-input
+            v-model="searchForm.row.customer_address"
+            placeholder="请输入收货地址"
+          ></el-input>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -120,7 +162,7 @@ const getListData = async () => {
       console.log(res);
       if (res.status.error_msg == "success") {
         setTimeout(() => {
-          tableData.value = res.bizobj;
+          tableData.value = res.data;
           total.value = Number(res.page_info.total_items);
           loading.value = false;
         }, 1000);

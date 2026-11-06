@@ -6,20 +6,36 @@
       </el-form-item>
     </el-form>
     <el-card>
-      <el-table :data="tableData" v-loading="loading" element-loading-text="加载中..." border>
+      <el-table
+        :data="tableData"
+        v-loading="loading"
+        element-loading-text="加载中..."
+        border
+      >
         <el-table-column prop="id" label="ID" align="center" width="120">
         </el-table-column>
-        <el-table-column prop="Inventory_name" label="任务名称" align="center" width="200">
+        <el-table-column
+          prop="Inventory_name"
+          label="任务名称"
+          align="center"
+          width="200"
+        >
         </el-table-column>
         <el-table-column label="是否启用(可操作)" align="center" width="175">
           <template #default="scope">
-            <el-button :type="scope.row.XY == 1 ? 'success' : scope.row.XY == 0 ? 'danger' : ''" plain
-              @click="up(scope.row)">{{ scope.row.XY == 1 ? "启用" : "停止" }}</el-button>
+            <el-button
+              :type="scope.row.XY == 1 ? 'success' : scope.row.XY == 0 ? 'danger' : ''"
+              plain
+              @click="up(scope.row)"
+              >{{ scope.row.XY == 1 ? "启用" : "停止" }}</el-button
+            >
           </template>
         </el-table-column>
-        <el-table-column prop="created_time" label="创建时间" align="center" width="200">
-        </el-table-column>
-
+        <!-- <el-table-column prop="XY" label="是否启用" align="center" width="100">
+          <template #default="{ row }">
+            <el-switch v-model="row.XY" />
+          </template>
+        </el-table-column> -->
         <el-table-column label="活动操作" width="308" align="center" fixed="right">
           <template #default="{ row }">
             <el-button type="danger" plain @click="onRemoveClick(row)">删除</el-button>
@@ -31,8 +47,12 @@
 
       <!-- 新增 -->
       <el-dialog v-model="add_dialogVisible" title="新增" width="30%">
-        <el-form label-position="top"><el-form-item label="任务名称" prop="Inventory_name">
-            <el-input v-model="searchForm.Inventory_name" placeholder="请输入任务名称"></el-input>
+        <el-form label-position="top"
+          ><el-form-item label="任务名称" prop="Inventory_name">
+            <el-input
+              v-model="searchForm.Inventory_name"
+              placeholder="请输入任务名称"
+            ></el-input>
           </el-form-item>
           <el-form-item label="是否启用" prop="Inventory_name">
             <el-switch v-model="searchForm.XY" />
@@ -46,14 +66,19 @@
         </template>
       </el-dialog>
       <!--分页组件-->
-      <pagination v-show="total > 0" :total="total" v-model:page="searchForm.page" v-model:limit="searchForm.page_size"
-        @pagination="getListData" />
+      <pagination
+        v-show="total > 0"
+        :total="total"
+        v-model:page="searchForm.page"
+        v-model:limit="searchForm.page_size"
+        @pagination="getListData"
+      />
     </el-card>
   </div>
 </template>
 <script setup>
 import { ref, onMounted, reactive } from "vue";
-import { api, uppd, Inventory_api } from "@/api/api";
+import { api, Inventory_api } from "@/api/api";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElMessageBox, ElMessage } from "element-plus";
@@ -109,7 +134,7 @@ const getListData = async () => {
       console.log(res);
       if (res.status.error_msg == "success") {
         setTimeout(() => {
-          tableData.value = res.bizobj;
+          tableData.value = res.data;
           total.value = Number(res.page_info.total_items);
           loading.value = false;
         }, 1000);
@@ -146,7 +171,7 @@ const add = async () => {
         ElMessage.error("新建失败！");
       }
     })
-    .catch((err) => { });
+    .catch((err) => {});
 };
 /**
  * 删除按钮点击事件
@@ -201,7 +226,7 @@ const outexxx = async (row) => {
       loading.value = false;
       if (res.status.error_code == 0) {
         ElMessage.success(res.status.error_msg);
-        window.location.replace(res.bizobj);
+        window.location.replace(res.data);
       } else {
         ElMessage.error(res.status.error_msg);
       }
@@ -228,14 +253,6 @@ const up = async (row) => {
           ElMessage.error("更新失败！");
         }
         dialogVisible.value = false;
-      })
-      .catch((err) => {
-        loading.value = false;
-      });
-    //同步shuju
-    await uppd(in_data)
-      .then((res) => {
-        console.log(res);
       })
       .catch((err) => {
         loading.value = false;

@@ -3,37 +3,62 @@
     <el-form :inline="true" :model="searchForm" v-show="showSearch">
       <el-form-item label="搜索类型" prop="Regional_barcode ">
         <el-select v-model="searchForm.field" clearable placeholder="选择搜索类型">
-          <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
         </el-select>
       </el-form-item>
       <el-form-item label="搜索的内容" v-if="searchForm.field">
-        <el-input v-model="searchForm.content" placeholder="请输入要搜索的内容" class="handle-input mr10" clearable></el-input>
+        <el-input
+          v-model="searchForm.content"
+          placeholder="请输入要搜索的内容"
+          class="handle-input mr10"
+          clearable
+        ></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="remoteMethod" style="margin-left: -16px">查询搜索
-        </el-button></el-form-item><el-form-item>
-        <el-button @click="getListData"><el-icon>
-            <HelpFilled />
-          </el-icon>重置</el-button></el-form-item>
+        <el-button type="primary" @click="remoteMethod" style="margin-left: -16px"
+          >查询搜索
+        </el-button></el-form-item
+      ><el-form-item>
+        <el-button @click="getListData"
+          ><el-icon><HelpFilled /></el-icon>重置</el-button
+        ></el-form-item
+      >
       <el-form-item>
         <el-button type="warning" :icon="Plus" @click="add_LiSt">新增</el-button>
       </el-form-item>
     </el-form>
     <el-card>
-      <el-table :data="tableData" v-loading="loading" element-loading-text="加载中..." border>
-
+      <el-table
+        :data="tableData"
+        v-loading="loading"
+        element-loading-text="加载中..."
+        border
+      >
+        <el-table-column prop="Sort" label="排序" align="center" width="80">
+        </el-table-column>
         <el-table-column prop="product_name" label="商品名" align="center" width="200">
         </el-table-column>
-        <el-table-column prop="id" label="商品ID" align="center" width="80">
-        </el-table-column>
-        <el-table-column prop="Regional_barcode" label="商品条码" align="center" width="120">
-        </el-table-column>
-        <el-table-column prop="Sort" label="排序" align="center" width="80">
+        <el-table-column
+          prop="Regional_barcode"
+          label="商品条码"
+          align="center"
+          width="120"
+        >
         </el-table-column>
         <el-table-column label="商品图" align="center" width="95">
           <template #default="{ row }">
-            <el-image class="avatar" :src="row.main_image" :z-index="10" :preview-src-list="[row.main_image]"
-              preview-teleported>
+            <el-image
+              class="avatar"
+              :src="row.main_image"
+              :z-index="10"
+              :preview-src-list="[row.main_image]"
+              preview-teleported
+            >
             </el-image>
           </template>
         </el-table-column>
@@ -52,21 +77,33 @@
         </el-table-column>
         <el-table-column prop="specification" label="规格" align="center" width="180">
         </el-table-column>
-        <el-table-column prop="specification_quantity" label="规格数" align="center" width="180">
+        <el-table-column
+          prop="specification_quantity"
+          label="规格数"
+          align="center"
+          width="180"
+        >
         </el-table-column>
         <el-table-column prop="created_time" label="操作时间" align="center" width="180">
         </el-table-column>
         <el-table-column label="活动操作" width="208" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" plain @click="onShowClick(row)">查看/编辑</el-button>
+            <el-button type="primary" plain @click="onShowClick(row)"
+              >查看/编辑</el-button
+            >
             <el-button type="danger" plain @click="onRemoveClick(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
 
       <!--分页组件-->
-      <pagination v-show="total > 0" :total="total" v-model:page="searchForm.page" v-model:limit="searchForm.page_size"
-        @pagination="getListData" />
+      <pagination
+        v-show="total > 0"
+        :total="total"
+        v-model:page="searchForm.page"
+        v-model:limit="searchForm.page_size"
+        @pagination="getListData"
+      />
     </el-card>
   </div>
 </template>
@@ -92,7 +129,7 @@ const searchForm = ref({
   field: "", //搜索字段
   content: "", //搜索内容
   page: 1,
-  page_size: 30,
+  page_size: 50,
 });
 
 const tableData = ref([]);
@@ -117,7 +154,7 @@ const getListData = async () => {
     loading.value = false;
     if (res.status.error_msg == "success") {
         tableData.value = [];
-      tableData.value = res.bizobj;
+      tableData.value = res.data;
       total.value = Number(res.page_info.total_items);
       ElMessage.success("查询了！");
     } else {
@@ -192,11 +229,7 @@ const onRemoveClick = async (row) => {
 // 查询操作
 const options = [
   {
-    value: "id",
-    label: "商品名ID",
-  },
-  {
-    value: "product_name",
+    value: "applet_name",
     label: "商品名",
   },
   {
@@ -222,7 +255,7 @@ const remoteMethod = async () => {
       .then((res) => {
           loading.value = false;
         if (res.status.error_msg == "success") {
-          tableData.value = res.bizobj;
+          tableData.value = res.data;
           total.value = 0;
         } else {
           ElMessage.error("无数据！");
