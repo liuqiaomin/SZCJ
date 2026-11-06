@@ -53,7 +53,7 @@ export default {
             meta: {
                 title: '预售商品新增', icon: 'article-create'
             },
-               hidden: true,//true不显示在侧边栏
+            hidden: true,//true不显示在侧边栏
         },
         {
             path: '/applet/Presalelist_xq',
@@ -64,7 +64,7 @@ export default {
             },
             hidden: true,//true不显示在侧边栏
         },
-       
+
         {
             path: '/applet/applet_chargeback',
             component: () => import('@/views/applet-page/applet_chargeback.vue'),
@@ -88,7 +88,16 @@ export default {
             meta: {
                 title: '系统设置', icon: 'article-create'
             }
-        }
+        },
+        {
+            path: '/applet/Distribution_List_order',
+            component: () => import('@/views/applet-page/Distribution_List_order.vue'),
+            name: 'Distribution_List_order',
+            meta: {
+                title: '用户订单', icon: 'article-create'
+            },
+            hidden: true,//true不显示在侧边栏
+        },
     ]
 }
 

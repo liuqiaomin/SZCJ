@@ -141,7 +141,7 @@
 </template>
 <script setup>
 import { ref, onMounted, watch, reactive } from "vue";
-import { api, API_PHP_DEMO } from "@/api/api";
+import { api } from "@/api/api";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElMessageBox, ElMessage } from "element-plus";
@@ -237,7 +237,7 @@ const API_PHP_DEMObu = async (row) => {
   let in_data = {
     id: row.id,
   };
-  await API_PHP_DEMO(in_data)
+  await api({ ...in_data, Type: 'orderListPrint' })
     .then((res) => {
       console.log(res);
       if (res.status.error_msg == "success") {

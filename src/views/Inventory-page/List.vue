@@ -78,7 +78,7 @@
 </template>
 <script setup>
 import { ref, onMounted, reactive } from "vue";
-import { api, Inventory_api } from "@/api/api";
+import { api } from "@/api/api";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElMessageBox, ElMessage } from "element-plus";
@@ -221,7 +221,7 @@ const outexxx = async (row) => {
   let p = {
     id: row.id,
   };
-  await Inventory_api(p)
+  await api({ ...p, Type: 'Inventory' })
     .then((res) => {
       loading.value = false;
       if (res.status.error_code == 0) {

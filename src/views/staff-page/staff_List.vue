@@ -37,7 +37,7 @@
       </el-table>
 
       <!-- 查看编辑 -->
-      <el-dialog v-model="dialogVisible" title="查看编辑" width="30%">
+      <el-dialog v-model="dialogVisible" title="查看编辑" width="60%">
         <el-form label-position="top">
           <el-form-item label="账号">
             <el-input v-model="searchForm.username" placeholder="自定义" />
@@ -54,13 +54,16 @@
           <el-divider />
 
           <el-form-item label="pc端权限设置">
-            <el-checkbox-group v-model="Permission_s">
-              <el-checkbox
-                v-for="item in Permission_x"
-                :key="item.name"
-                :label="item.name"
-              />
-            </el-checkbox-group>
+            <el-tree
+              ref="editTreeRef"
+              class="perm-tree"
+              :data="permissionTree"
+              :props="treeProps"
+              node-key="name"
+              show-checkbox
+              default-expand-all
+              :expand-on-click-node="false"
+            />
           </el-form-item>
 
           <el-divider />
@@ -99,13 +102,16 @@
           </el-form-item>
 
           <el-form-item label="权限设置">
-            <el-checkbox-group v-model="Permission_s">
-              <el-checkbox
-                v-for="item in Permission_x"
-                :key="item.name"
-                :label="item.name"
-              />
-            </el-checkbox-group>
+            <el-tree
+              ref="addTreeRef"
+              class="perm-tree"
+              :data="permissionTree"
+              :props="treeProps"
+              node-key="name"
+              show-checkbox
+              default-expand-all
+              :expand-on-click-node="false"
+            />
           </el-form-item>
 
           <el-divider />
@@ -140,8 +146,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { api, getPermission } from '@/api/api'
+import { ref, reactive, computed, nextTick, onMounted } from 'vue'
+import { api } from '@/api/api'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 
@@ -172,12 +178,79 @@ const total = ref(0)
 
 const Permission_x = ref<PermissionItem[]>([])
 const Permission_s = ref<string[]>([])
+// 手机端权限完整模板
+const elementsList = ref<any[]>([])
+
+// ===================== 权限树 =====================
+const editTreeRef = ref<any>()
+const addTreeRef = ref<any>()
+const treeProps = { label: 'label', children: 'children' }
+
+/** 接口权限数据 -> 树节点（支持多级 children，children 内每项都可独立勾选） */
+const toPermissionNode = (item: PermissionItem): any => ({
+  name: item.name,
+  label: item.title || item.name,
+  raw: item,
+  children: (item.children || []).map(toPermissionNode)
+})
+
+const permissionTree = computed<PermissionItem[]>(() =>
+  Permission_x.value.map(toPermissionNode)
+)
+
+/** 权限树的层级顺序（父级在前），用于生成 Permission_name */
+const permissionNameOrder = computed<string[]>(() => {
+  const names: string[] = []
+  const walk = (nodes: any[]) => {
+    nodes.forEach((node) => {
+      names.push(node.name)
+      if (node.children?.length) walk(node.children)
+    })
+  }
+  walk(permissionTree.value)
+  return names
+})
+
+/** 取树中已勾选的权限名（父级全选 + 子级单选都会返回） */
+const getCheckedPermission = (tree: any): string[] => {
+  if (!tree) return []
+  const selected = new Set<string>(tree.getCheckedKeys(false))
+  return permissionNameOrder.value.filter((name) => selected.has(name))
+}
+
+/** 回显：父级名称会级联勾选其下所有子权限，子级名称单独勾选 */
+const setCheckedPermission = (getTree: () => any, names: string[]) => {
+  nextTick(() => {
+    const tree = getTree()
+    if (!tree) return
+    tree.setCheckedKeys([], false)
+    names.forEach((name) => {
+      const node = tree.getNode(name)
+      if (node) tree.setChecked(node, true, !!node.childNodes?.length)
+    })
+  })
+}
+
+/** 按勾选结果裁剪权限数据，只保留选中的节点及其父级 */
+const filterPermissionTree = (
+  items: PermissionItem[],
+  selected: Set<string>
+): PermissionItem[] => {
+  const result: PermissionItem[] = []
+  items.forEach((item) => {
+    const children = filterPermissionTree(item.children || [], selected)
+    if (selected.has(item.name) || children.length) {
+      result.push({ ...item, children })
+    }
+  })
+  return result
+}
 
 const searchForm = reactive({
-  id: '',
+  id: '' as string | number,
   username: '',
   role_name: '',
-  password: '',
+  password: '' as string | undefined,
   Permission: [] as PermissionItem[],
   Permission_name: '',
   page: 1,
@@ -193,10 +266,12 @@ onMounted(() => {
 
 // ===================== 权限列表 =====================
 const get_Permission = async () => {
-  const data = await getPermission()
+  const data = await api({ Type: 'getPermission' })
   Permission_x.value = data.bizobj || []
 
-  searchForm.elements = (data.elements || []).map((item: any) => ({
+  // 手机端权限模板（保留完整 title，供新增/取消时重置使用）
+  elementsList.value = data.elements || []
+  searchForm.elements = elementsList.value.map((item: any) => ({
     ...item,
     XY: false
   }))
@@ -232,11 +307,14 @@ const cz = () => {
   searchForm.password = ''
   searchForm.Permission = []
   searchForm.Permission_name = ''
-  searchForm.elements = Permission_x.value.map(() => ({
+  searchForm.elements = elementsList.value.map((item: any) => ({
+    ...item,
     XY: false
   }))
 
   Permission_s.value = []
+  editTreeRef.value?.setCheckedKeys([], false)
+  addTreeRef.value?.setCheckedKeys([], false)
   dialogVisible.value = false
   add_dialogVisible.value = false
 }
@@ -248,9 +326,15 @@ const xq = (row: TableRow) => {
   searchForm.role_name = row.role_name
   searchForm.password = row.password
 
-  searchForm.elements = JSON.parse(row.elements || '[]').map((item: any) => ({
+  // 手机端权限回显：以完整模板为基准，按已保存数据勾选
+  const savedElements = JSON.parse(row.elements || '[]')
+  const savedMap = new Map<string, any>(
+    savedElements.map((item: any) => [item.name, item])
+  )
+  const baseElements = elementsList.value.length ? elementsList.value : savedElements
+  searchForm.elements = baseElements.map((item: any) => ({
     ...item,
-    XY: !!item.XY
+    XY: !!savedMap.get(item.name)?.XY
   }))
 
   // ✅ PC 端权限回显
@@ -259,6 +343,7 @@ const xq = (row: TableRow) => {
     : []
 
   dialogVisible.value = true
+  setCheckedPermission(() => editTreeRef.value, Permission_s.value)
 }
 
 // ===================== 删除 =====================
@@ -291,15 +376,14 @@ const onRemoveClick = async (row: TableRow) => {
 }
 
 // ===================== 构建权限数据 =====================
-const buildPermissionData = () => {
-  searchForm.Permission = []
-  Permission_s.value.forEach((name) => {
-    const item = Permission_x.value.find(p => p.name === name)
-    if (item) {
-      searchForm.Permission.push(item)
-    }
-  })
-  searchForm.Permission_name = Permission_s.value.join('/')
+const buildPermissionData = (tree: any) => {
+  const names = getCheckedPermission(tree)
+  Permission_s.value = names
+  searchForm.Permission = filterPermissionTree(
+    Permission_x.value,
+    new Set<string>(names)
+  )
+  searchForm.Permission_name = names.join('/')
 }
 
 // ===================== 更新 =====================
@@ -309,7 +393,7 @@ const up = async () => {
     return
   }
 
-  buildPermissionData()
+  buildPermissionData(editTreeRef.value)
 
   const res = await api({
     Type: 'adminList_up',
@@ -339,7 +423,7 @@ const openAdd = () => {
 }
 
 const add = async () => {
-  buildPermissionData()
+  buildPermissionData(addTreeRef.value)
 
   const res = await api({
     Type: 'adminList_add',
@@ -368,5 +452,14 @@ const add = async () => {
     margin-bottom: 22px;
     text-align: right;
   }
+}
+
+.perm-tree {
+  width: 100%;
+  max-height: 320px;
+  overflow: auto;
+  padding: 6px 8px;
+  border: 1px solid var(--el-border-color);
+  border-radius: 4px;
 }
 </style>

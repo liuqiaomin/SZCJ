@@ -146,7 +146,7 @@ const dd_bu = (row) => {
         name: row.name
     };
     router.push({
-        path: "/applet/Presalelist_order_list",
+        path: "/applet/Distribution_List_order",
         query: i,
     });
 };

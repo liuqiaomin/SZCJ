@@ -106,7 +106,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { api, Salesperson_api } from "@/api/api";
+import { api } from "@/api/api";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElMessageBox, ElMessage } from "element-plus";
@@ -250,7 +250,7 @@ const outexxx = async () => {
     downloadtp: 0, // 返回下载地址
   };
 
-  await Salesperson_api(p)
+  await api({ ...p, Type: 'exportSalesmanOrder' })
     .then((res) => {
       loading.value = false;
       if (res.status && res.status.error_code == 0) {

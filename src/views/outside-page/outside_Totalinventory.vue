@@ -80,7 +80,7 @@
 </template>
 <script setup>
 import { ref, onMounted, watch, reactive } from "vue";
-import { api, Totalinventory_api } from "@/api/api";
+import { api } from "@/api/api";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElMessageBox, ElMessage } from "element-plus";
@@ -155,7 +155,7 @@ const outexxx = async () => {
   let p = {
     time: searchForm.value.time,
   };
-  await Totalinventory_api(p)
+  await api({ ...p, Type: 'exportProductStock' })
     .then((res) => {
       console.log(res);
       loading.value = false;

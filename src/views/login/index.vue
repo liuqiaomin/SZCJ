@@ -65,7 +65,7 @@ import { UserFilled, Lock, Tickets } from '@element-plus/icons'
 
 import { ref, onMounted } from 'vue'
 import { validatePassword, validateCode } from './rules'
-import { getCode } from '@/api/api'
+import { api } from '@/api/api'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ElMessage } from "element-plus";
@@ -166,7 +166,7 @@ const handleLogin = () => {
  * 获取图形验证码
  */
 const getCodeImg = () => {
-  getCode({})
+  api({ Type: 'getCaptchaCode' })
     .then(data => {
       let obj = data.bizobj
 

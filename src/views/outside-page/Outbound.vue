@@ -73,7 +73,7 @@
 </template>
 <script setup>
 import { ref, onMounted, watch, reactive } from "vue";
-import { api, Outbound_api } from "@/api/api";
+import { api } from "@/api/api";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import { ElMessageBox, ElMessage } from "element-plus";
@@ -136,7 +136,7 @@ const outexxx = async () => {
     let p = {
       time: searchForm.value.time,
     };
-    await Outbound_api(p)
+    await api({ ...p, Type: 'exportOrderShipment' })
       .then((res) => {
         loading.value = false;
         if (res.status.error_code == 0) {

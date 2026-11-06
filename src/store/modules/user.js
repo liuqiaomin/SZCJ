@@ -1,4 +1,4 @@
-import {login, getPermission} from '@/api/api'
+import {api} from '@/api/api'
 import {setItem, getItem, removeAllItem} from '@/utils/storage'
 import {TOKEN, USERINFO} from '@/constant'
 import {setTimeStamp} from '@/utils/auth'
@@ -37,7 +37,8 @@ export default {
         login(context, userInfo) {
             const {username, password, captcha_code, code_key} = userInfo
             return new Promise((resolve, reject) => {
-                login({
+                api({
+                    Type: 'login',
                     username,
                     password,
                     captcha_code,
@@ -58,7 +59,7 @@ export default {
         },
         getPermissionData(context) {
             return new Promise((resolve, reject) => {
-                getPermission()
+                api({ Type: 'getPermission' })
                     .then(data => {
                         let obj = formatPermissionList(data.bizobj)
                         console.log(obj)

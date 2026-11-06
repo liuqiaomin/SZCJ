@@ -77,7 +77,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from "vue";
-import { api, API_PHP_DEMO } from "@/api/api";
+import { api } from "@/api/api";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 
@@ -159,7 +159,7 @@ const onShowClick = (row) => {
 // ==================== 打印 ====================
 const API_PHP_DEMObu = async (row) => {
   try {
-    const res = await API_PHP_DEMO({ id: row.id });
+    const res = await api({ id: row.id, Type: 'orderListPrint' });
     if (res.status?.error_msg === "success") {
       ElMessage.success("发起打印成功");
     } else {

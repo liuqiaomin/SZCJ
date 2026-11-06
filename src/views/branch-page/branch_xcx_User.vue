@@ -137,7 +137,7 @@
 </template>
 <script setup>
 import { ref, onMounted, watch, reactive } from "vue";
-import { api, API_PHP_DEMO } from "@/api/api";
+import { api } from "@/api/api";
 import { useRouter, useRoute } from "vue-router";
 import { ElMessageBox, ElMessage } from "element-plus";
 const router = useRouter();
